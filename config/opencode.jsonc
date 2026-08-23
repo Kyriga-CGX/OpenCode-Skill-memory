@@ -1,0 +1,58 @@
+﻿{
+    "$schema":  "https://opencode.ai/config.json",
+    "plugin":  [
+                   "superpowers@git+https://github.com/obra/superpowers.git",
+                   "opencode-supermemory@latest",
+                   "opencode-vibeguard",
+                   "@tarquinen/opencode-dcp@3.1.13"
+               ],
+    "mcp":  {
+                "context7":  {
+                                 "type":  "remote",
+                                 "url":  "https://mcp.context7.com/mcp",
+                                 "enabled":  true,
+                                 "headers":  {
+                                                 "CONTEXT7_API_KEY":  "${CONTEXT7_API_KEY}"
+                                             }
+                             },
+                "notion":  {
+                               "type":  "stdio",
+                               "command":  "npx",
+                               "args":  [
+                                            "-y",
+                                            "@notionhq/notion-mcp-server"
+                                        ],
+                               "enabled":  false,
+                               "env":  {
+                                           "NOTION_API_KEY":  "${NOTION_API_KEY}",
+                                           "NOTION_ROOT_PAGE_ID":  "${NOTION_ROOT_PAGE_ID}"
+                                       }
+                           },
+                "google-sheets":  {
+                                      "type":  "stdio",
+                                      "command":  "npx",
+                                      "args":  [
+                                                   "-y",
+                                                   "mcp-google-sheets"
+                                               ],
+                                      "enabled":  false,
+                                      "env":  {
+                                                  "GOOGLE_API_KEY":  "${GOOGLE_API_KEY}",
+                                                  "GOOGLE_SHEETS_ID":  "${GOOGLE_SHEETS_ID}"
+                                              }
+                                  },
+                "airtable":  {
+                                 "type":  "stdio",
+                                 "command":  "npx",
+                                 "args":  [
+                                              "-y",
+                                              "@felores/airtable-mcp-server"
+                                          ],
+                                 "enabled":  false,
+                                 "env":  {
+                                             "AIRTABLE_API_KEY":  "${AIRTABLE_API_KEY}",
+                                             "AIRTABLE_BASE_ID":  "${AIRTABLE_BASE_ID}"
+                                         }
+                             }
+            }
+}

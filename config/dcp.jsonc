@@ -1,0 +1,21 @@
+﻿{
+    "strategies":  {
+                       "purgeErrors":  {
+                                           "turns":  4,
+                                           "enabled":  true
+                                       },
+                       "deduplication":  {
+                                             "enabled":  true
+                                         }
+                   },
+    "autoUpdate":  true,
+    "pruneNotification":  "minimal",
+    "compress":  {
+                     "permission":  "allow",
+                     "maxContextLimit":  100000,
+                     "nudgeForce":  "soft",
+                     "mode":  "range",
+                     "minContextLimit":  50000
+                 },
+    "enabled":  true
+}

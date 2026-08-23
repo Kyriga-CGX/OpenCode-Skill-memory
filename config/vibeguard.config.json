@@ -1,0 +1,40 @@
+﻿{
+    "debug":  false,
+    "placeholder_prefix":  "__VG_",
+    "patterns":  {
+                     "regex":  [
+
+                               ],
+                     "builtin":  [
+                                     "email",
+                                     "uuid",
+                                     "ipv4",
+                                     "mac"
+                                 ],
+                     "exclude":  [
+                                     "example.com",
+                                     "localhost",
+                                     "127.0.0.1",
+                                     "0.0.0.0"
+                                 ],
+                     "keywords":  [
+{
+                                              "category":  "API_KEY",
+                                              "value":  "${CONTEXT7_API_KEY}"
+                                          },
+                                          {
+                                              "category":  "API_KEY",
+                                              "value":  "${OPENAI_API_KEY}"
+                                          },
+                                          {
+                                              "category":  "API_KEY",
+                                              "value":  "${SUPERMEMORY_API_KEY}"
+                                          }
+                                  ]
+                 },
+    "session":  {
+                    "ttl":  "1h",
+                    "max_mappings":  100000
+                },
+    "enabled":  true
+}

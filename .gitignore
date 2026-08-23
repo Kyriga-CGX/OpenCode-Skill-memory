@@ -1,0 +1,22 @@
+# Secrets — never commit
+.env
+*.pem
+*.key
+
+# Node modules
+node_modules/
+
+# Supermemory sensitive files (only data/data is tracked)
+supermemory/bin/
+supermemory/data/api-key
+supermemory/data/auth-secret
+supermemory/data/machine-key
+supermemory/data/instance-id
+supermemory/data/.instance.lock
+
+# SDD ledgers / scratch
+.superpowers/
+
+# OS
+Thumbs.db
+.DS_Store
