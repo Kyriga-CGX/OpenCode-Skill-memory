@@ -143,6 +143,16 @@ Non serve aspettare un bug segnalato: il bug hunting trova problemi prima che l'
 4. Registra ogni bug trovato con: tecnica che l'ha scoperto, manifestazione, root cause, fix.
 5. Se trovi 0 bug, specifica quali tecniche hai applicato e perché l'area è pulita (niente affermazioni generiche tipo "è tutto ok").
 
+### Report post-giro (se hai trovato roba)
+
+Al termine del giro, **se hai trovato almeno un bug**:
+
+1. Raccogli i findings in forma concisa (ID, tipo, gravità, componente, replica breve).
+2. **Chiedi all'utente** (tool `question`) se vuole generare il documento di report completo. Opzioni: "Sì, genera il report" / "No, solo riepilogo".
+3. Se SÌ: genera il documento seguendo il template `vulnerability-report.md` della skill `mind-security` (4 tipologie di vulnerabilità, come replicarlo, impatto, fix, prevenzione, referenze).
+4. Se NO: riepiloga i findings in chat (ID, gravità, fix consigliato) senza generare file.
+5. In ogni caso, salva il riepilogo in mind-memory (tool `memory add`).
+
 ### Anti-pattern del bug hunting
 
 | Anti-pattern | Perché è sbagliato |

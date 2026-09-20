@@ -134,12 +134,22 @@ Checklist obbligatoria su ogni punto di ingresso:
 | Breach | containment→post-mortem | incident report + lezioni salvate in mind-memory |
 | Verifica | scan + test manuali | output dello scan + checklist firmata |
 
-## 6. Chiusura
+## 6. Report (dopo il giro, se ci sono findings)
+
+Al termine del giro (threat model, analisi o breach), **se hai trovato almeno una vulnerabilità/bug**:
+
+1. Raccogli i findings in forma concisa (ID, tipologia, gravità, componente, replica breve).
+2. **Chiedi all'utente** (tool `question`) se vuole generare il documento di report completo. Opzioni: "Sì, genera il report" / "No, mostrami solo il riepilogo".
+3. Se SÌ: genera il documento seguendo il template **`vulnerability-report.md`** (nella stessa cartella di questa skill): 4 tipologie, come replicarlo, impatto, fix, prevenzione, referenze.
+4. Se NO: riepiloga i findings in chat (ID, gravità, fix consigliato) senza generare file.
+5. In ogni caso, salva il riepilogo in mind-memory (tool `memory add`).
+
+## 7. Chiusura
 
 1. Chiudere SEMPRE con **mind-verification**.
 2. Salvare pattern, decisioni e lezioni apprese in **mind-memory** (tool `memory add`).
 3. Per piani complessi coordinare prima con **mind-brainstorming** e **mind-planning**; per l'esecuzione usare **mind-implementation** e **execution-hygiene**.
 
-## 7. Norma
+## 8. Norma
 
 Ogni affermazione di completamento richiede evidenza (scan, test, configurazione verificata). Senza evidenza: task NON completo.

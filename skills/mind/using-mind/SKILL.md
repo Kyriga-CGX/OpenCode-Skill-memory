@@ -92,6 +92,8 @@ Quando un task ha più unità di lavoro indipendenti:
 3. Ogni subagent: input preciso, output richiesto, criterio di done.
 4. Merge dei risultati e verifica integrata (`mind-verification`).
 
+**Agenti FMA**: assegna a ogni subagent un nome di personaggio Fullmetal Alchemist (vedi `fma-agents.md` in questa cartella, ruolo → personaggio). Ogni tanto apri il prompt o il report con una battuta dell'anime dal medesimo file.
+
 ## Casi particolari
 
 - **Task UI+BE**: segui la rotta del dominio predominante; il gate finale copre l'intero delta.

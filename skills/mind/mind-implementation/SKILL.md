@@ -38,6 +38,8 @@ task tool con:
 - NESSUN riferimento alla cronologia della chat precedente
 ```
 
+**Agenti FMA**: assegna a ogni subagent un **nome di personaggio** Fullmetal Alchemist dal file `using-mind/fma-agents.md` (ruolo → personaggio, es. Edward Elric per implementer, Roy Mustang per review). **Ogni tanto** (non sempre) apri il prompt o il report del subagent con una **battuta dell'anime** dal medesimo file, coerente col contesto.
+
 Regole dispatch:
 - Ogni subagent riceve SOLO il proprio brief — non impilare storia passata
 - Un subagent per unità, tutte in parallelo
