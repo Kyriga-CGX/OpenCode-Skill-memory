@@ -31,11 +31,15 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Refactoring (no cambio stack) | mind-refactor → gate (→ mind-debugging se scopre bug, → mind-migration se serve upgrade) |
 | API / endpoint / contratti / consumo terze parti | mind-api → (mind-security se auth/dati sensibili) → mind-implementation → gate |
 | Deploy / CI-CD / container / infrastruttura | mind-devops → gate |
+| Git workflow / branch / commit / worktree | mind-git → gate |
 | Release / versioning / changelog / tag | mind-release → mind-devops (build/publish) → gate |
 | Domanda libreria / framework | context7-mcp |
 | Esecuzione piano | mind-planning → mind-implementation + execution-hygiene |
 | Init progetto | ecosystem-health-check → orchestrator → design-md/DESIGN.md (solo se UI) |
 | Review codice | mind-implementation (review/fix-loop) / mind-verification |
+| Richiamo lavoro precedente | memory tool (search) via mind-memory; se non basta → mind-recall (storico sessioni) |
+| Prima configurazione / progetto nuovo | mind-setup (domande una alla volta → working-set) → rotta del task |
+| Documenti (PDF/DOCX/XLSX/PPTX) | mind-documents → (mind-copy per il testo) → gate |
 
 ## Precedenze
 
@@ -46,6 +50,10 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 5. `mind-verification` / `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 6. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete.
 7. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
+8. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta.
+9. `mind-setup` è il gate iniziale su progetto nuovo: prima la configurazione (working-set), poi il task.
+10. `mind-git` entra SOLO quando il task tocca versionamento/branch/commit/worktree.
+10. Gli MCP si invocano SOLO on-demand (es. `context7-mcp`), MAI una call MCP all'avvio del programma.
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -72,3 +80,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Incident vs bug**: produzione giù/degrado → `mind-incident` (mitigazione+postmortem); bug senza impatto produzione → `mind-debugging`.
 - **i18n vs feature**: task con lingue/traduzioni/RTL → `mind-i18n` prima, poi la rotta di implementazione normale.
 - **Eval del sistema**: valutare prompt/agent/skill di mind stesso → `mind-eval`; le modifiche le applica l'orchestratore con eval prima/dopo.
+- **Richiamo vs recall**: prima `mind-memory` (tool memory search), poi `mind-recall` (storico sessioni, sola lettura) se la memoria non basta.
+- **Prima configurazione**: progetto nuovo senza config salvata → `mind-setup` prima del task.
+- **Documenti vs codice**: .pdf/.docx/.xlsx/.pptx → `mind-documents`; codice/testo → rotta normale.
+- **Git vs implementazione**: versionamento (commit/branch/worktree/PR) → `mind-git`; parallelismo dei subagent usa i worktree di mind-git.

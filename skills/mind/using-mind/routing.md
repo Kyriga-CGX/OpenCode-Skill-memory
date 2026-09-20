@@ -31,13 +31,17 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Refactoring (no cambio stack) | `mind-refactor` → `mind-verification` (→ `mind-debugging` se scopre bug, → `mind-migration` se serve upgrade) |
 | API / endpoint / contratti / consumo terze parti | `mind-api` → (`mind-security` se auth/dati sensibili) → `mind-implementation` → `mind-verification` |
 | Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
+| Git workflow / branch / commit / worktree | `mind-git` → `mind-verification` |
 | Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step / spec pronto | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice / PR | `mind-implementation` (review + fix-loop) / `mind-verification` |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory`, prima di rispondere |
+| Richiamo lavoro precedente (memoria non basta) | `mind-recall` (storico sessioni, sola lettura) → `mind-memory` (salva se duraturo) |
 | Salvataggio preferenza/contesto | `memory` tool (add) via `mind-memory` |
+| Prima configurazione / progetto nuovo | `mind-setup` (domande una alla volta → working-set in memoria) → rotta del task |
+| Documenti (PDF/DOCX/XLSX/PPTX) | `mind-documents` → (`mind-copy` per il testo) → (`mind-verification` se consegna) |
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -59,6 +63,9 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione quando il task tocca dati sensibili, auth, pagamenti o rete (threat model prima di scrivere codice).
 9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
+10. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta.
+11. `mind-setup` è il gate iniziale su progetto nuovo: prima la configurazione (working-set), poi il task.
+12. Gli MCP si invocano SOLO on-demand, quando un agente deve fare una chiamata (es. `context7-mcp`). MAI una call MCP all'avvio del programma.
 
 ## Casi limite
 
@@ -82,6 +89,10 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Eval del sistema**: valutare i prompt/agent/skill di mind stesso (non codice app) → `mind-eval`; il report guida l'orchestratore a modificare il sistema con eval prima/dopo.
 - **Clarificazione prima della rotta**: non fare domande di chiarimento prima di aver scelto la rotta; la skill scelta guida l'esplorazione (es. `mind-brainstorming` fa domande una alla volta).
 - **Gate finale**: il gate `mind-verification` (evidenza fresca di verifica, nessuna affermazione senza prova) si applica a ogni rotta di implementazione. `execution-hygiene` fornisce le regole operative (checkpoint, registro, qualità) lungo la rotta.
+- **Richiamo vs recall**: prima cerca in `mind-memory` (tool `memory` search, veloce). Se la memoria non contiene il contesto (o serve storico completo), usa `mind-recall` (query read-only sul DB locale, cita sempre id sessione + titolo). Non invertire l'ordine.
+- **Prima configurazione**: al primo messaggio di un progetto nuovo senza configurazione salvata, apri con `mind-setup` (annuncio + domande una alla volta + working-set in memoria), poi instrada il task. Non lavorare prima della configurazione.
+- **Documenti vs codice**: file .pdf/.docx/.xlsx/.pptx → `mind-documents` (creare/modificare/leggere + verifica visiva). Codice o testo semplice → rotta normale. Il testo dentro un documento → `mind-copy` se serve copywriting.
+- **Git vs implementazione**: task di versionamento (commit/branch/worktree/PR) → `mind-git`. Il parallelismo dei subagent di mind-implementation usa i worktree di mind-git. Non confondere: git gestisce COME versionare, implementation COSA costruire.
 - **Proattività**: se noti un gap nei requisiti, un rischio o un miglioramento utile non richiesto → proponilo con il tool `question` PRIMA di procedere (o segnalalo durante il lavoro). Non ignorarlo, non implementarlo in silenzio fuori scope. Regole operative in using-mind/SKILL.md e nelle skill mind-planning/mind-implementation.
 
 ## Output attesi (catena)
@@ -91,6 +102,8 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - `mind-planning` → piano in `docs/plans/YYYY-MM-DD-<topic>.md` con header e task
 - `mind-implementation` → codice + test che passano + ledger
 - `mind-explore` → Codebase Digest (docs/ o README) + mappa salvata in memoria
+- `mind-recall` → contesto recuperato dallo storico con fonte (id sessione + titolo)
+- `mind-setup` → working-set salvato in memoria (type=configuration)
 - `mind-incident` → postmortem in `docs/incidents/YYYY-MM-DD-<slug>-postmortem.md` (azioni con owner+scadenza)
 - `mind-eval` → report in `docs/eval/YYYY-MM-DD-<target>-eval.md` + memoria
 - `mind-verification` → evidenza eseguita (output test/lint/build) e conferma

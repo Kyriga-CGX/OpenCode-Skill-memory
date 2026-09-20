@@ -11,6 +11,8 @@ Mind è l'**entry point globale**. Non è una skill di contenuto: **coordina le 
 
 Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla tabella sotto. Se in dubbio, usa la route conservativa. Poi invoca la skill con il tool `skill` e annuncia: `Uso <skill> per <scopo>`.
 
+**Prima configurazione (gate iniziale)**: al primo messaggio di un progetto nuovo (o se in memoria non esiste una configurazione salvata per questo progetto/utente), NON instradare subito il task: annuncia "prima di partire dobbiamo fare una prima configurazione" ed esegui `mind-setup` (domande una alla volta → salvataggio working-set in memoria). Poi riprendi la rotta normale.
+
 ## Tabella di routing (tutte le skill)
 
 | Tipo di task | Rotta (in ordine) |
@@ -38,12 +40,15 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Refactoring (no cambio stack) | `mind-refactor` → `mind-verification` (→ `mind-debugging` se scopre bug, → `mind-migration` se serve upgrade) |
 | API / endpoint / contratti / consumo terze parti | `mind-api` → (`mind-security` se auth/dati sensibili) → `mind-implementation` → `mind-verification` |
 | Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
+| Git workflow / branch / commit / worktree | `mind-git` → `mind-verification` |
 | Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice | `mind-implementation` (review + fix-loop) / `mind-verification` |
-| Richiamo lavoro precedente | `memory` tool (search) via `mind-memory`, prima di rispondere |
+| Richiamo lavoro precedente | `memory` tool (search) via `mind-memory`, prima di rispondere; se non basta → `mind-recall` (storico sessioni) |
+| Prima configurazione / progetto nuovo senza config | `mind-setup` → poi la rotta del task |
+| Documenti (PDF/DOCX/XLSX/PPTX) | `mind-documents` → (`mind-copy` per il testo) → (`mind-verification` se consegna) |
 
 ## Precedenze
 
@@ -56,6 +61,8 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete (threat model prima del codice).
 9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
+10. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta. Mai invertire.
+11. Gli MCP si invocano SOLO on-demand, quando un agente deve fare una chiamata (es. `context7-mcp` per documentazione). MAI una call MCP all'avvio del programma: rallenta il boot.
 
 ## Gate e sequenza (regole di orchestrazione)
 
@@ -102,6 +109,11 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **motion → frontend-design**: `motion` delega la direzione estetica a `frontend-design`
 - **frontend-design / design-system / motion → memory**: prima di progettare, cerca nelle memorie le preferenze utente e il contesto del progetto (tool `memory` search)
 - **memory → qualsiasi skill di contenuto**: se il messaggio richiama lavoro precedente, recupera il contesto PRIMA di rispondere
+- **memory → mind-recall**: se la memoria `mind-memory` non basta, `mind-recall` interroga lo storico delle sessioni (sola lettura) e riporta il contesto con la fonte (id sessione + titolo)
+- **mind-setup → orchestratore**: la configurazione raccolta (working-set) torna a using-mind, che instrada il task reale
+- **mind-documents → mind-copy / frontend-design / verification**: il documento prodotto si coordina col copywriting del testo, con la direzione di brand se è un deliverable, e chiude con verifica visiva
+- **mind-git → implementation/security/release**: i worktree isolano i subagent paralleli, i segreti nel diff vanno a mind-security, la release (tag/changelog) chiude il ciclo
+- **mind-recall → memory**: il contesto storico recuperato che è duraturo viene (previo consenso) salvato in mind-memory
 - **ogni rotta di implementazione → mind-verification**: nessun lavoro è completo senza evidenza di verifica
 
 ## Principi di esecuzione

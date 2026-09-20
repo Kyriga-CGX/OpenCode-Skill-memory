@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Entry point globale del sistema di skill; precede using-mind e le skill di cluster. Attivala per QUALSIASI task: nuova feature o lavoro creativo, costruire o modificare UI, animazione/motion/3D, prosa/testi/copy, copywriting, esplorazione codice, decisioni architetturali, incidenti in produzione, localizzazione, bug, bug hunting, sicurezza/breach, ricerca, performance, dati, test, documentazione, refactoring, API, migrazione, release/versioning, deploy/CI-CD, valutazione del sistema, domanda su libreria o framework, esecuzione di un piano, init di un progetto, review di codice. Non produce contenuto: coordina le skill, decide la rotta e delega a catena.
+description: Entry point globale del sistema di skill; precede using-mind e le skill di cluster. Attivala per QUALSIASI task: nuova feature o lavoro creativo, costruire o modificare UI, animazione/motion/3D, prosa/testi/copy, copywriting, esplorazione codice, decisioni architetturali, incidenti in produzione, localizzazione, bug, bug hunting, sicurezza/breach, ricerca, performance, dati, test, documentazione, refactoring, API, migrazione, release/versioning, deploy/CI-CD, valutazione del sistema, domanda su libreria o framework, esecuzione di un piano, init di un progetto, review di codice, documenti (PDF/DOCX/XLSX/PPTX), git workflow, richiamo di lavoro precedente, prima configurazione di un progetto nuovo. Non produce contenuto: coordina le skill, decide la rotta e delega a catena.
 ---
 
 # Orchestrator per OpenCode
