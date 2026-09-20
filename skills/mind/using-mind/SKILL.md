@@ -16,10 +16,19 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Tipo di task | Rotta (in ordine) |
 |---|---|
 | Nuova feature / lavoro creativo | `mind-brainstorming` → `mind-planning` → `mind-implementation` → `mind-verification` |
-| UI (costruire o modificare) | `frontend-design` (direzione) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
+| UI (costruire o modificare) | `frontend-design` (direzione, consulta design-references) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
 | Animazione / motion / 3D | `motion` → `frontend-design` (solo se serve direzione) → `mind-verification` |
 | Prosa / testi / copy | `stop-slop` |
 | Bug / comportamento inatteso | `mind-debugging` → `mind-implementation` (TDD) → `mind-verification` |
+| Bug hunting proattivo / review difensiva | `mind-debugging` (sezione bug hunting) → `mind-testing` → `mind-verification` |
+| Sicurezza / breach / threat model / hardening | `mind-security` → `mind-implementation` (fix) → `mind-verification` |
+| Ricerca tecnica / scelta libreria-framework / comparazione | `mind-research` (→ `context7-mcp` per documentazione) |
+| Performance / lentezza / ottimizzazione | `mind-performance` (misura PRIMA) → `mind-implementation` → `mind-verification` |
+| Dati / database / query / ETL / analisi | `mind-data` → (`mind-implementation` se c'è codice) → `mind-verification` |
+| Test strategy / scrittura test | `mind-testing` → `mind-verification` |
+| Documentazione (README/API/guide/DESIGN.md) | `mind-docs` → `mind-verification` |
+| Migrazione / upgrade / refactoring esteso | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
@@ -35,6 +44,17 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 5. `motion` entra SOLO se il task tocca animazioni.
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
+8. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete (threat model prima del codice).
+9. `mind-migration`/`mind-performance`/`mind-data` entrano SOLO se il task tocca quel dominio specifico.
+
+## Gate e sequenza (regole di orchestrazione)
+
+1. **Review intermedia obbligatoria** tra `mind-planning` → `mind-implementation`: rileggi il piano contro lo spec prima del dispatch. Se diverge, torna a `mind-planning`.
+2. **Regression check nel gate**: quando MODIFICHI codice esistente, verifica che il comportamento precedente continui a funzionare, non solo che il nuovo passi.
+3. **Auto-scrittura in memoria**: a fine rotta, salva in `mind-memory` (tool `memory` add) pattern, decisioni, errori superati e architettura.
+4. **Controllo conflitti file pre-dispatch**: prima dei subagent in parallelo, mappa i file toccati; se due unità scrivono lo stesso file, separale o serializza.
+5. **Delivery in fasi** per feature grandi: offri fasi funzionanti (fase 1 → fasi successive) invece di un piano monolitico.
+6. **Design debt check post-build**: dopo una rotta UI, verifica che il CSS non cancelli selettori e che `DESIGN.md` resti aggiornato.
 
 ## Comunicazione tra skill
 
@@ -43,6 +63,13 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **brainstorming → planning**: lo spec approvato (docs/specs/YYYY-MM-DD-<topic>-design.md) è l'input del piano
 - **planning → implementation**: il piano (header + task) è l'input del dispatch subagent
 - **debugging → implementation**: la root cause identificata + il test che fallisce sono l'input del fix
+- **security → implementation**: il threat model e i vettori individuati sono l'input dei fix di sicurezza
+- **research → planning/implementation**: la raccomandazione con fonti è l'input del piano o del codice
+- **performance → implementation**: la baseline misurata e il collo di bottiglia sono l'input dell'ottimizzazione
+- **data → implementation**: schema/query/analisi verificate sono l'input del codice
+- **testing → implementation**: la strategia e i test (TDD) guidano l'implementazione
+- **migration → implementation**: il delta analizzato e il punto di rollback guidano la migrazione
+- **devops → implementation**: la pipeline e gli ambienti guidano il codice di deploy
 - **design-system → frontend-design**: `design-system` delega la direzione estetica a `frontend-design` (inverse: `frontend-design` non enforce, delega a `design-system`)
 - **motion → frontend-design**: `motion` delega la direzione estetica a `frontend-design`
 - **frontend-design / design-system / motion → memory**: prima di progettare, cerca nelle memorie le preferenze utente e il contesto del progetto (tool `memory` search)

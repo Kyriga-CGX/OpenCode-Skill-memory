@@ -8,17 +8,35 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 |---|---|
 | Nuova feature / lavoro creativo | `mind-brainstorming` → `mind-planning` → `mind-implementation` → `mind-verification` |
 | Feature semplice ben definita | `mind-planning` → `mind-implementation` → `mind-verification` |
-| UI (costruire o modificare) | `frontend-design` (direzione) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
+| UI (costruire o modificare) | `frontend-design` (direzione, consulta design-references) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
 | UI (solo ritocco stile esistente) | `design-system` (enforce) → `mind-verification` |
 | Animazione / motion / 3D | `motion` → `frontend-design` (solo se serve direzione) → `mind-verification` |
 | Prosa / testi / copy | `stop-slop` |
 | Bug / comportamento inatteso | `mind-debugging` → `mind-implementation` (TDD) → `mind-verification` |
+| Bug hunting proattivo / review difensiva | `mind-debugging` (sezione bug hunting) → `mind-testing` → `mind-verification` |
+| Sicurezza / breach / threat model / hardening | `mind-security` → `mind-implementation` (fix) → `mind-verification` |
+| Ricerca tecnica / scelta libreria-framework / comparazione | `mind-research` (→ `context7-mcp` per documentazione) |
+| Performance / lentezza / ottimizzazione | `mind-performance` (misura PRIMA) → `mind-implementation` → `mind-verification` |
+| Dati / database / query / ETL / analisi | `mind-data` → (`mind-implementation` se c'è codice) → `mind-verification` |
+| Test strategy / scrittura test | `mind-testing` → `mind-verification` |
+| Documentazione (README/API/guide/DESIGN.md) | `mind-docs` → `mind-verification` |
+| Migrazione / upgrade / refactoring esteso | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
 | Piano multi-step / spec pronto | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice / PR | `mind-implementation` (review + fix-loop) / `mind-verification` |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory`, prima di rispondere |
 | Salvataggio preferenza/contesto | `memory` tool (add) via `mind-memory` |
+
+## Regole di orchestrazione (gate e sequenza)
+
+1. **Review intermedia obbligatoria** tra `mind-planning` → `mind-implementation`: prima di dispatch dei subagent, rileggi il piano contro lo spec (coerenza requisiti, task completi, niente placeholder). Se il piano diverge dallo spec approvato, torna a `mind-planning` prima di implementare.
+2. **Regression check nel gate**: quando si MODIFICA codice esistente, il gate `mind-verification` include verificare che il comportamento precedente continui a funzionare (test esistenti, build, flow chiave), non solo che il nuovo codice passi.
+3. **Auto-scrittura in memoria**: a fine rotta di implementazione, salva in `mind-memory` (tool `memory` add) i risultati utili (pattern applicati, decisioni, errori superati, architettura del progetto) — non solo se richiesto.
+4. **Controllo conflitti file pre-dispatch**: in `mind-implementation`, PRIMA di lanciare i subagent in parallelo, mappa i file toccati da ogni unità; se due unità scrivono lo stesso file, separale (o serializza) prima del dispatch.
+5. **Delivery in fasi per feature grandi**: in `mind-planning`, se la feature è grande, offri esplicitamente fasi (fase 1 funzionante → fasi successive) invece di un piano monolitico.
+6. **Design debt check post-build**: dopo una rotta UI (frontend-design/design-system/motion), verifica che il CSS generato non cancelli selettori e che `DESIGN.md` resti aggiornato rispetto al codice reale.
 
 ## Precedenze
 
@@ -29,6 +47,8 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 5. `motion` entra nella rotta SOLO se il task tocca animazioni.
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
+8. `mind-security` va PRIMA di qualsiasi implementazione quando il task tocca dati sensibili, auth, pagamenti o rete (threat model prima di scrivere codice).
+9. `mind-migration`/`mind-performance`/`mind-data` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Casi limite
 
@@ -36,6 +56,9 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Dubbio sul tipo di task**: route conservativa (creativo → `mind-brainstorming`; bug → `mind-debugging`; domanda → `context7-mcp`). Se la rotta si rivela sbagliata, rifalla sul tipo reale.
 - **Task misto UI + copy**: prima la rotta UI, poi `stop-slop` sui testi; gate unico finale.
 - **Fix rapido di un bug già investigato**: la root cause è nota e c'è un test che fallisce → salta `mind-debugging`, vai direttamente a `mind-implementation` (TDD). Se il fix fallisce, torna a `mind-debugging`.
+- **Task misto sicurezza + feature**: se la feature tocca auth/dati sensibili/pagamenti/rete, apri con `mind-security` (threat model) PRIMA di `mind-brainstorming`/`mind-planning`, poi rientra nella rotta standard.
+- **Performance segnalata come "lento"**: NON ottimizzare a naso. `mind-performance` misura PRIMA (baseline), identifica il collo di bottiglia, poi implementa.
+- **Task misto dati + feature**: prima `mind-data` per schema/query verificate, poi la rotta standard; il gate finale copre l'intero delta.
 - **Clarificazione prima della rotta**: non fare domande di chiarimento prima di aver scelto la rotta; la skill scelta guida l'esplorazione (es. `mind-brainstorming` fa domande una alla volta).
 - **Gate finale**: il gate `mind-verification` (evidenza fresca di verifica, nessuna affermazione senza prova) si applica a ogni rotta di implementazione. `execution-hygiene` fornisce le regole operative (checkpoint, registro, qualità) lungo la rotta.
 
@@ -45,3 +68,10 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - `mind-planning` → piano in `docs/plans/YYYY-MM-DD-<topic>.md` con header e task
 - `mind-implementation` → codice + test che passano + ledger
 - `mind-verification` → evidenza eseguita (output test/lint/build) e conferma
+
+## Fonti esterne
+
+- **Grafica/UI**: `frontend-design/design-references.md` — gallerie (awwwards, refs.gallery, godly, land-book, siteinspire), tipografia (fontsinuse, typewolf, practicaltypography), colore (huemint, coolors, Material 3), design system (M3, HIG, Refactoring UI, nngroup). Consultalo quando serve direzione estetica.
+- **Motion**: `motion/reference/sources.md` + `motion/reference/motion-catalog.md`.
+- **Librerie/framework**: `context7-mcp` (MCP Context7).
+- Le fonti sono riferimento, mai copia pedissequa: adatta un principio al brief.

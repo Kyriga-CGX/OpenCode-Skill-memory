@@ -117,3 +117,38 @@ Ma: il 95% dei casi "nessuna root cause" è un'indagine incompleta.
 - **Tracciamento root cause**: traccia il bug all'indietro attraverso lo stack per trovare il trigger originale
 - **Difesa in profondità**: dopo aver trovato la root cause, aggiungi validazione a più livelli
 - **Attesa basata su condizione**: sostituisci timeout arbitrari con polling su condizione
+
+## Bug hunting proattivo (ricerca sistematica di bug)
+
+Non serve aspettare un bug segnalato: il bug hunting trova problemi prima che l'utente li veda. Da usare su review di codice, feature nuove o codebase legacy.
+
+### Tecniche (per rigore)
+
+| Tecnica | Cosa cercare | Come |
+|---|---|---|
+| **Edge case** | Input vuoti, null, undefined, 0, negativo, massimi, unicode, stringhe enormi | Passa ogni funzione/endpoint con valori limite e atipici |
+| **Boundary scanning** | Off-by-one, `<=` vs `<`, lunghezze, indici, paginazione | Verifica i confini: esattamente al limite, appena dentro, appena fuori |
+| **Stato e transizioni** | Macchine a stati, flag, timing, race condition | Elenca gli stati, testa ogni transizione e le sequenze illecite |
+| **Gestione errori** | Catch vuoti, errori inghiottiti, try senza finally, errori non gestiti | Forza i percorsi di errore: rete giù, file mancante, permessi, timeout, quota piena |
+| **Concorrenza e async** | Promise non awaited, race, deadlock, mutazione condivisa | Esegui operazioni in parallelo, rientranze, doppi submit |
+| **Dati e persistenza** | Schema mismatch, encoding, duplicati, dati orfani, rollback incompleti | Verifica crea/aggiorna/elimina in sequenza e le violazioni di vincolo |
+| **Sicurezza di base** | Input non validati, injection, auth bypass, secret esposti | Vedi `mind-security` per il threat model completo |
+| **Codice morto e path inaccessibili** | Rami mai eseguiti, condizioni sempre vere/false, funzioni non usate | Rileggi i branch e verifica che ogni percorso sia raggiungibile |
+
+### Flusso
+
+1. Scegli l'area (feature nuova, diff, modulo a rischio).
+2. Applica le tecniche pertinenti (tabella sopra) scrivendo o eseguendo test mirati.
+3. Ogni bug trovato: segui le **4 fasi** di questa skill (root cause PRIMA del fix), non fixare a naso.
+4. Registra ogni bug trovato con: tecnica che l'ha scoperto, manifestazione, root cause, fix.
+5. Se trovi 0 bug, specifica quali tecniche hai applicato e perché l'area è pulita (niente affermazioni generiche tipo "è tutto ok").
+
+### Anti-pattern del bug hunting
+
+| Anti-pattern | Perché è sbagliato |
+|---|---|
+| Fixare bug mentre li cerchi | Rompe il flusso e mischia indagine e modifica |
+| Solo "guardare il codice" senza eseguire | La lettura non rivela errori a runtime |
+| Testare solo il percorso felice | I bug stanno nei casi limite, non nel main path |
+| Fermarsi al primo bug | Il primo bug spesso nasconde altri |
+| Bug hunting senza registrazione | I risultati non sono riusabili

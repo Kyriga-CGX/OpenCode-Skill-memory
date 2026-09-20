@@ -17,6 +17,7 @@ Determina se il progetto corrente ha già un `DESIGN.md` alla root.
 2. **Riferisci le regole di enforcement** — leggi `enforce.md`. Qui l'enforcement dei token è **automatico**, non un semplice suggerimento. Qualsiasi lavoro sulla UI deve usare i token definiti nel DESIGN.md.
 3. **Riferisci le regole anti-slop** — leggi `anti-slop.md` quando rivedi o scrivi UI, per individuare i pattern di default che fanno sembrare un design generato da una AI.
 4. **Ottieni prima la direzione estetica** — prima di scrivere qualsiasi codice UI, invoca la skill `frontend-design`. Fornisce la direzione estetica distintiva e con un punto di vista che i token del DESIGN.md devono servire. Il design è un prerequisito del codice, mai un ripensamento.
+5. **Consulta le fonti di riferimento** — se serve ispirazione o direzione, leggi `frontend-design/design-references.md` (gallerie awwwards/refs.gallery/godly, tipografia fontsinuse/typewolf, colore huemint/Material 3, design system Refactoring UI/nngroup).
 
 ## Ordine delle operazioni
 
