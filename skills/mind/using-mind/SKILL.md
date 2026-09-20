@@ -27,8 +27,11 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Dati / database / query / ETL / analisi | `mind-data` → (`mind-implementation` se c'è codice) → `mind-verification` |
 | Test strategy / scrittura test | `mind-testing` → `mind-verification` |
 | Documentazione (README/API/guide/DESIGN.md) | `mind-docs` → `mind-verification` |
-| Migrazione / upgrade / refactoring esteso | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Migrazione / upgrade / cambio stack | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Refactoring (no cambio stack) | `mind-refactor` → `mind-verification` (→ `mind-debugging` se scopre bug, → `mind-migration` se serve upgrade) |
+| API / endpoint / contratti / consumo terze parti | `mind-api` → (`mind-security` se auth/dati sensibili) → `mind-implementation` → `mind-verification` |
 | Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
+| Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
@@ -45,7 +48,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete (threat model prima del codice).
-9. `mind-migration`/`mind-performance`/`mind-data` entrano SOLO se il task tocca quel dominio specifico.
+9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Gate e sequenza (regole di orchestrazione)
 
@@ -69,6 +72,13 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **data → implementation**: schema/query/analisi verificate sono l'input del codice
 - **testing → implementation**: la strategia e i test (TDD) guidano l'implementazione
 - **migration → implementation**: il delta analizzato e il punto di rollback guidano la migrazione
+- **refactor → debugging/migration**: se durante il refactoring scopri un bug → `mind-debugging` (root cause prima del fix); se scopri che serve un upgrade/stack change → `mind-migration`
+- **refactor → testing**: il refactoring parte SOLO con test che proteggono il comportamento (baseline verde); `mind-testing` fornisce la rete di sicurezza
+- **api → security**: se l'API tocca auth/dati sensibili/pagamenti, il threat model di `mind-security` viene PRIMA del contratto e del codice
+- **api → docs**: il contratto OpenAPI/documentazione è parte dell'API, coordinata con `mind-docs`
+- **api → migration**: modificare un'API esistente usata da client = breaking change, gestito con `mind-migration` (versioning/deprecation)
+- **release → devops**: la release usa la pipeline di build/publish di `mind-devops`; il tag/changelog di `mind-release` chiude il ciclo
+- **release → verification**: nessuna release senza build+test verdi (gate `mind-verification`)
 - **devops → implementation**: la pipeline e gli ambienti guidano il codice di deploy
 - **design-system → frontend-design**: `design-system` delega la direzione estetica a `frontend-design` (inverse: `frontend-design` non enforce, delega a `design-system`)
 - **motion → frontend-design**: `motion` delega la direzione estetica a `frontend-design`

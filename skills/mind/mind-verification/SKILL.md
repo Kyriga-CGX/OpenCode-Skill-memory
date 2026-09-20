@@ -46,6 +46,8 @@ Saltare un passaggio = mentire, non verificare
 | Test di regressione funziona | Ciclo red-green verificato | Test che passa una volta |
 | Agente completato | Diff VCS mostra modifiche | L'agente riporta "success" |
 | Requisiti soddisfatti | Checklist linea per linea | Test che passano |
+| UI accessibile | Axe-core: 0 violations + check manuali (contrasto, tastiera, etichette) | "Il testo c'è", contrasto verificato a occhio |
+| Regressione visiva ok | Diff screenshot esaminati / baseline confermata | "Sembra uguale", screenshot accettato a scatola chiusa |
 
 ## Red flags — FERMATI
 
@@ -101,6 +103,18 @@ Saltare un passaggio = mentire, non verificare
 ```
 ✅ L'agente riporta success → Controlla il diff VCS → Verifica le modifiche → Riporta lo stato reale
 ❌ Fidarsi del report dell'agente
+```
+
+**A11y (rotta UI):**
+```
+✅ [Esegui axe-core] [Vedi: 0 violations] + check manuali (contrasto, Tab) → "La UI è accessibile"
+❌ "Il contrasto sembra ok" / "L'etichetta c'è"
+```
+
+**Visual regression (rotta UI):**
+```
+✅ [Esegui screenshot diff] [Vedi: baseline o diff esaminati] → "La UI non è regredita"
+❌ "Sembra uguale a prima"
 ```
 
 ## Quando applicarla

@@ -20,8 +20,11 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Dati / database / ETL / analisi | mind-data → (mind-implementation se codice) → gate |
 | Test strategy / scrittura test | mind-testing → gate |
 | Documentazione | mind-docs → gate |
-| Migrazione / upgrade / refactoring esteso | mind-migration → mind-implementation → gate |
+| Migrazione / upgrade / cambio stack | mind-migration → mind-implementation → gate |
+| Refactoring (no cambio stack) | mind-refactor → gate (→ mind-debugging se scopre bug, → mind-migration se serve upgrade) |
+| API / endpoint / contratti / consumo terze parti | mind-api → (mind-security se auth/dati sensibili) → mind-implementation → gate |
 | Deploy / CI-CD / container / infrastruttura | mind-devops → gate |
+| Release / versioning / changelog / tag | mind-release → mind-devops (build/publish) → gate |
 | Domanda libreria / framework | context7-mcp |
 | Esecuzione piano | mind-planning → mind-implementation + execution-hygiene |
 | Init progetto | ecosystem-health-check → orchestrator → design-md/DESIGN.md (solo se UI) |
@@ -35,7 +38,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 4. `motion` entra nella rotta SOLO se il task tocca animazioni.
 5. `mind-verification` / `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 6. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete.
-7. `mind-migration`/`mind-performance`/`mind-data` entrano SOLO se il task tocca quel dominio specifico.
+7. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -53,3 +56,6 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Gate finale**: il gate `mind-verification` si applica a ogni rotta di implementazione — evidenza fresca, nessuna affermazione falsa; `execution-hygiene` fornisce le regole operative lungo la rotta.
 - **Task misto sicurezza + feature**: threat model (`mind-security`) PRIMA di brainstorming/planning, poi rotta standard.
 - **Performance segnalata come "lento"**: mai ottimizzare a naso; `mind-performance` misura prima (baseline), poi implementa.
+- **Refactor vs migration**: "rifattorizza/pulisci/riorganizza/semplifica" senza cambio stack → `mind-refactor`; upgrade/cambio stack → `mind-migration`.
+- **Task API**: endpoint/contratti/versioning/consumo terze parti → `mind-api`; auth/dati sensibili → `mind-security` prima del contratto; API esistente modificata → breaking change via `mind-migration`.
+- **Release a fine ciclo**: release/versione/changelog/tag → `mind-release`, appoggiandosi a `mind-devops`; gate `mind-verification` (build+test) prima del tag.

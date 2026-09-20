@@ -65,6 +65,54 @@ Output: tabella ambiente → tecnologia → comando build → comando deploy →
 - La pipeline verde è condizione per merge e per deploy.
 - Fail fast: interrompi alla prima fase rossa.
 - Nessun test saltato con `only`, `skip` o `xfail` per far passare la pipeline.
+- **Includi i test E2E/visual/a11y in CI** (da `mind-testing`): la suite Playwright gira in un job dedicato con i browser installati; i test E2E che l'utente ha deciso di tenere sono parte del gate di merge.
+
+**Template base (GitHub Actions)** — adatta al progetto (package manager, framework, comandi reali verificati):
+
+```yaml
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test -- --ci --coverage
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+```
+
+- Adatta: nome branch, package manager (npm/yarn/pnpm/bun), runtime (node/python/go), comandi effettivi del progetto.
+- Verifica che gli script esistano in package.json prima di citarli nel workflow.
+- Il job e2e dipende dal job test: build/test passano prima dei flussi end-to-end.
 
 ### 4. DEPLOY
 

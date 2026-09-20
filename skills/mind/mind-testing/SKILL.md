@@ -92,6 +92,36 @@ Da usare quando la strategia (FASE 1) ha individuato flussi utente critici end-t
 
 **Verifica E2E**: esegui la suite (`npx playwright test`), conferma che i flussi critici passano in headless, e che falliscono quando la funzionalità è rotta (mutazione mentale del codice → test rosso).
 
+### FASE 5.1 — VISUAL REGRESSION (screenshot diff)
+
+Per rotte/componenti UI dove la regressione visiva conta (stili, layout, DESIGN.md). Complementare al design debt check dell'orchestratore.
+
+- **Setup**: Playwright `toHaveScreenshot()` (o Percy se il progetto lo usa già). Baseline = screenshot del primo run accettato.
+- **Cosa coprire**: pagine/rotte principali, componenti con logica visiva (stati: hover, focus, mobile, dark). NON coprire zone soggette a dati dinamici senza mascheramento.
+- **Flusso**: baseline → modifica → diff → conferma (accetta o fixa). Ogni diff va ispezionato manualmente: accettarlo senza guardarlo = baseline corrotta.
+- **Gate**: una rotta UI chiusa passa SOLO se i diff sono esaminati (o i screenshot aggiornati con conferma esplicita dell'utente).
+- **Anti-pattern**: screenshot giganti, baseline accettata a scatola chiusa, testare animazioni (motion) senza `prefers-reduced-motion` fisso.
+
+### FASE 5.2 — SEED E FIXTURE (dati di test)
+
+Per rendere test deterministici a TUTTI i livelli, soprattutto E2E/integration.
+
+- **Seed**: stato iniziale noto del DB/dati prima dei test (factory, script seed, DB di test dedicato). Ogni test parte da uno stato conosciuto.
+- **Fixture**: oggetti riutilizzabili (utente, ordine, documento) generati da factory, non copiati a mano.
+- **Isolamento**: ogni test crea/pulisce i propri dati; MAI condividere stato tra test (ordine non garantito).
+- **Verifica**: il seed è applicato e i dati attesi esistono PRIMA di asserire; teardown ripulisce.
+- **Anti-pattern**: dati hardcoded nei test, test che dipendono da record pre-esistenti, seed non idempotente.
+
+### FASE 5.3 — ACCESSIBILITÀ (a11y)
+
+Per ogni UI costruita o modificata (rotta UI dell'orchestratore).
+
+- **Verifica automatica**: integra `@axe-core/playwright` nei test E2E: `const results = await new AxeBuilder({ page }).analyze(); expect(results.violations).toEqual([]);` sui flussi principali.
+- **Check manuali quando la UI è modificata**: contrasto (WCAG AA), focus visibile e navigabile, etichette per input (`getByLabel`), alt text, lang, landmark (header/nav/main), `prefers-reduced-motion` rispettato.
+- **Flusso tastiera**: navigare le pagine chiave solo da tastiera (Tab/Shift+Tab/Enter) e verificare che il focus sia visibile e l'ordine sensato.
+- **Gate**: una rotta UI passa SOLO se l'audit axe non ha violations e i check manuali sono fatti.
+- **Anti-pattern**: contrasto verificato solo a occhio, focus invisibile, "è accessibile perché il testo c'è".
+
 ### FASE 6 — VERIFICA
 
 - Esegui **TUTTA la suite**, non solo il test nuovo.
@@ -125,6 +155,9 @@ Da usare quando la strategia (FASE 1) ha individuato flussi utente critici end-t
 | TDD | Test rosso → minimo → verde → refactor | Output rosso e verde |
 | Isolamento | Confini mocked, core reale | Setup test |
 | E2E Playwright | Flussi critici utente + domanda all'utente se tenere i test | Suite e2e passa + decisione utente registrata |
+| Visual regression | Baseline + diff screenshot per rotte UI | Diff esaminati o baseline confermata |
+| Seed/Fixture | Stato noto + dati riutilizzabili, isolati | Test deterministici, teardown pulito |
+| A11y | Axe-core + check manuali (contrasto, tastiera, etichette) | 0 violations, check manuali fatti |
 | Verifica | Suite intera + coverage | Exit code 0, report coverage |
 
 ## 7. Regola finale

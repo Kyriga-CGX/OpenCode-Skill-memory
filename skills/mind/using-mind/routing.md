@@ -20,8 +20,11 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Dati / database / query / ETL / analisi | `mind-data` → (`mind-implementation` se c'è codice) → `mind-verification` |
 | Test strategy / scrittura test | `mind-testing` → `mind-verification` |
 | Documentazione (README/API/guide/DESIGN.md) | `mind-docs` → `mind-verification` |
-| Migrazione / upgrade / refactoring esteso | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Migrazione / upgrade / cambio stack | `mind-migration` → `mind-implementation` → `mind-verification` |
+| Refactoring (no cambio stack) | `mind-refactor` → `mind-verification` (→ `mind-debugging` se scopre bug, → `mind-migration` se serve upgrade) |
+| API / endpoint / contratti / consumo terze parti | `mind-api` → (`mind-security` se auth/dati sensibili) → `mind-implementation` → `mind-verification` |
 | Deploy / CI-CD / container / infrastruttura | `mind-devops` → `mind-verification` |
+| Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step / spec pronto | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
@@ -48,7 +51,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione quando il task tocca dati sensibili, auth, pagamenti o rete (threat model prima di scrivere codice).
-9. `mind-migration`/`mind-performance`/`mind-data` entrano SOLO se il task tocca quel dominio specifico.
+9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Casi limite
 
@@ -58,6 +61,9 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Fix rapido di un bug già investigato**: la root cause è nota e c'è un test che fallisce → salta `mind-debugging`, vai direttamente a `mind-implementation` (TDD). Se il fix fallisce, torna a `mind-debugging`.
 - **Task misto sicurezza + feature**: se la feature tocca auth/dati sensibili/pagamenti/rete, apri con `mind-security` (threat model) PRIMA di `mind-brainstorming`/`mind-planning`, poi rientra nella rotta standard.
 - **Performance segnalata come "lento"**: NON ottimizzare a naso. `mind-performance` misura PRIMA (baseline), identifica il collo di bottiglia, poi implementa.
+- **Refactor vs migration**: "rifattorizza/pulisci/riorganizza/semplifica il codice" SENZA cambio stack → `mind-refactor` (comportamento invariato, rete di sicurezza di test). Upgrade di versioni, cambio framework/architettura/stack → `mind-migration`. Se durante il refactor emerge un bug → richiama `mind-debugging`; se emerge la necessità di un upgrade → richiama `mind-migration`.
+- **Task API**: creare/modificare endpoint, contratti, versioning, consumo terze parti → `mind-api`. Se l'API espone auth, dati sensibili o pagamenti → apri con `mind-security` (threat model) prima del contratto. Modifica di un'API esistente consumata altrove → considera breaking change e coordina con `mind-migration`.
+- **Release a fine ciclo**: dopo una feature completata e verificata, se l'utente chiede release/versione/changelog/tag → `mind-release` (semantic versioning + changelog + tag annotato), che si appoggia a `mind-devops` per build/publish; il gate `mind-verification` (build+test verdi) precede il tag.
 - **Task misto dati + feature**: prima `mind-data` per schema/query verificate, poi la rotta standard; il gate finale copre l'intero delta.
 - **Clarificazione prima della rotta**: non fare domande di chiarimento prima di aver scelto la rotta; la skill scelta guida l'esplorazione (es. `mind-brainstorming` fa domande una alla volta).
 - **Gate finale**: il gate `mind-verification` (evidenza fresca di verifica, nessuna affermazione senza prova) si applica a ogni rotta di implementazione. `execution-hygiene` fornisce le regole operative (checkpoint, registro, qualità) lungo la rotta.
