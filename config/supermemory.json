@@ -1,8 +1,0 @@
-{
-  "apiKey": "${SUPERMEMORY_API_KEY}",
-  "baseUrl": "http://localhost:6767",
-  "injectProfile": true,
-  "captureEveryNTurns": 0,
-  "keywordPatterns": [],
-  "autoRecallEveryPrompt": false
-}

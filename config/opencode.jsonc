@@ -1,10 +1,10 @@
 ﻿{
     "$schema":  "https://opencode.ai/config.json",
     "plugin":  [
-                   "superpowers@git+https://github.com/obra/superpowers.git",
-                   "opencode-supermemory@latest",
                    "opencode-vibeguard",
-                   "@tarquinen/opencode-dcp@3.1.13"
+                   "@tarquinen/opencode-dcp@3.1.13",
+                   "file:C:/Users/Kyrig/.config/opencode/plugins/mind/mind.js",
+                   "file:C:/Users/Kyrig/.config/opencode/plugins/mind-memory/mind-memory.js"
                ],
     "mcp":  {
                 "context7":  {
@@ -12,7 +12,7 @@
                                  "url":  "https://mcp.context7.com/mcp",
                                  "enabled":  true,
                                  "headers":  {
-                                                 "CONTEXT7_API_KEY":  "${CONTEXT7_API_KEY}"
+                                                 "CONTEXT7_API_KEY":  "ctx7sk-21178279-27cc-433d-aa94-cf7e1179f06b"
                                              }
                              },
                 "notion":  {
