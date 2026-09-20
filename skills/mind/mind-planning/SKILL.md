@@ -74,6 +74,15 @@ Ogni task deve essere eseguibile da un subagent senza chiedere chiarimenti.
 3. **Type consistency**: le firme (interfaces Consumes/Produces) sono coerenti tra i task?
 4. **Task order**: le dipendenze tra task sono corrette? Ogni task può passare solo con i suoi prerequisiti?
 
+## Proattività nel piano (gap e miglioramenti)
+
+Durante la pianificazione, se noti qualcosa che manca o che migliorerebbe il risultato, **proponilo** (non ignorarlo, non implementarlo da solo):
+
+1. **Gap nello spec**: requisito mancante, vincolo non chiaro, caso limite non coperto → domanda all'utente (tool `question`) con opzioni, PRIMA di finalizzare il piano.
+2. **Elemento mancante utile**: test mancanti, docs, configurazione, gestione errori, accessibilità, security di base, backup → proponi un task aggiuntivo (opzioni: "aggiungo task per X" / "salta X").
+3. **Approccio migliore**: se conosci una soluzione più solida di quella richiesta → presentala come opzione (non sostituirla in silenzio).
+4. Ogni proposta è una domanda: se l'utente rifiuta, procedi col piano come richiesto.
+
 ## Handoff
 
 Dopo la self-review, presenta il piano all'utente e offri l'esecuzione con `mind-implementation` (multi-subagent in parallelo).

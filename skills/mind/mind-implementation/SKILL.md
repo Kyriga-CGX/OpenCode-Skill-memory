@@ -13,6 +13,15 @@ Implementa il piano con TDD e subagent in parallelo: scomponi in unità indipend
 - Piano scritto (da `mind-planning`)
 - Se mancano: invoca prima quelle skill
 
+## Proattività durante l'implementazione
+
+Durante il lavoro, se noti un problema o un'opportunità NON previsti nel piano:
+
+1. **Rischio scoperto** (bug latente, conflitto non visto, security/performance issue): fermati e segnala all'utente con una domanda (tool `question`) — non fixare in silenzio fuori scope.
+2. **Gap nel piano** (task incompleto, manca un caso edge, un test, una configurazione): proponi l'aggiunta (opzioni) prima di procedere oltre.
+3. **Miglioramento utile**: presentalo come opzione, non sostituirlo alla richiesta originale.
+4. **Se l'utente rifiuta**: procedi come da piano, documenta la decisione nel ledger.
+
 ## Principi
 
 - **Più subagent, non uno**: dispatch N subagent in parallelo, uno per unità di lavoro indipendente. Mai un singolo subagent per tutto il lavoro

@@ -61,6 +61,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Task misto dati + feature**: prima `mind-data` per schema/query verificate, poi la rotta standard; il gate finale copre l'intero delta.
 - **Clarificazione prima della rotta**: non fare domande di chiarimento prima di aver scelto la rotta; la skill scelta guida l'esplorazione (es. `mind-brainstorming` fa domande una alla volta).
 - **Gate finale**: il gate `mind-verification` (evidenza fresca di verifica, nessuna affermazione senza prova) si applica a ogni rotta di implementazione. `execution-hygiene` fornisce le regole operative (checkpoint, registro, qualità) lungo la rotta.
+- **Proattività**: se noti un gap nei requisiti, un rischio o un miglioramento utile non richiesto → proponilo con il tool `question` PRIMA di procedere (o segnalalo durante il lavoro). Non ignorarlo, non implementarlo in silenzio fuori scope. Regole operative in using-mind/SKILL.md e nelle skill mind-planning/mind-implementation.
 
 ## Output attesi (catena)
 

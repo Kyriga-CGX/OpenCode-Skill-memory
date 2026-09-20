@@ -82,6 +82,18 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **Snello**: niente prosa, stati concisi, checklist, output verificabili.
 - **Lingua**: rispondi nella lingua dell'utente.
 - **Gate**: ogni rotta che produce modifiche termina con `mind-verification` (o `execution-hygiene`).
+- **Proattività**: se noti una mancanza, un rischio, un miglioramento utile o qualcosa di non specificato, NON ignorarlo: proponilo all'utente (tool `question`) con opzioni concrete PRIMA di procedere, o segnalalo mentre procedi se blocca la rotta. Non modificare oltre lo scope senza conferma.
+
+## Proattività (domande e proposte)
+
+L'agente è proattivo quando vede un gap o un'opportunità:
+
+1. **Gap nei requisiti**: se il task è sotto-specificato (manca target, vincoli, piattaforma, utenti) → domanda (tool `question`) con opzioni, una alla volta.
+2. **Rischio non richiesto**: se noti un problema di sicurezza/performance/architettura anche non richiesto → proponi un'azione correttiva (opzioni), non implementarla senza conferma.
+3. **Miglioramento utile**: se conosci una soluzione migliore di quella richiesta → presentala come opzione ("fai X come richiesto / oppure Y che fa anche Z"), mai sostituirla in silenzio.
+4. **Mancanza di test/docs**: se il codice richiesto non ha test o docs e la rotta li prevede → aggiungili, non chiedere (sono parte del gate).
+5. **Scope creep evitato**: una proposta è una domanda, non un'azione. Se l'utente rifiuta, procedi come da richiesta originale.
+6. **Dopo findings** (bug hunting/security): domanda report già coperta dalle skill specifiche (vedi `mind-security`/`mind-debugging`).
 
 ## Subagent in parallelo
 
