@@ -35,6 +35,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Release / versioning / changelog / tag | mind-release → mind-devops (build/publish) → gate |
 | Domanda libreria / framework | context7-mcp |
 | Esecuzione piano | mind-planning → mind-implementation + execution-hygiene |
+| Obiettivo complesso / piano da eseguire per intero in autonomia (multi-sessione) | mind-runner (coda persistente + loop + checkpoint + gate verde) |
 | Init progetto | ecosystem-health-check → orchestrator → design-md/DESIGN.md (solo se UI) |
 | Review codice | mind-implementation (review/fix-loop) / mind-verification |
 | Richiamo lavoro precedente | memory tool (search) via mind-memory; se non basta → mind-recall (storico sessioni) |
@@ -54,6 +55,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 9. `mind-setup` è il gate iniziale su progetto nuovo: prima la configurazione (working-set), poi il task.
 10. `mind-git` entra SOLO quando il task tocca versionamento/branch/commit/worktree.
 10. Gli MCP si invocano SOLO on-demand (es. `context7-mcp`), MAI una call MCP all'avvio del programma.
+11. `mind-runner` entra SOLO per un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner.
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -84,3 +86,4 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Prima configurazione**: progetto nuovo senza config salvata → `mind-setup` prima del task.
 - **Documenti vs codice**: .pdf/.docx/.xlsx/.pptx → `mind-documents`; codice/testo → rotta normale.
 - **Git vs implementazione**: versionamento (commit/branch/worktree/PR) → `mind-git`; parallelismo dei subagent usa i worktree di mind-git.
+- **Runner vs task singolo**: piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni, "finisci da solo") → `mind-runner` (loop con coda persistente e checkpoint). Un singolo task → rotta specifica, NON il runner.

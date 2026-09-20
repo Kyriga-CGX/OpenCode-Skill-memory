@@ -43,6 +43,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Git workflow / branch / commit / worktree | `mind-git` → `mind-verification` |
 | Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` |
+| Obiettivo complesso / piano da eseguire per intero in autonomia (lavoro multi-sessione, "finisci da solo") | `mind-runner` (coda persistente + loop + checkpoint + gate verde) — piano da `mind-planning`, task via `mind-implementation`, gate via `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice | `mind-implementation` (review + fix-loop) / `mind-verification` |
@@ -63,6 +64,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
 10. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta. Mai invertire.
 11. Gli MCP si invocano SOLO on-demand, quando un agente deve fare una chiamata (es. `context7-mcp` per documentazione). MAI una call MCP all'avvio del programma: rallenta il boot.
+12. `mind-runner` entra SOLO quando il task è un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner: va dritto alla rotta specifica.
 
 ## Gate e sequenza (regole di orchestrazione)
 
@@ -114,6 +116,8 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **mind-documents → mind-copy / frontend-design / verification**: il documento prodotto si coordina col copywriting del testo, con la direzione di brand se è un deliverable, e chiude con verifica visiva
 - **mind-git → implementation/security/release**: i worktree isolano i subagent paralleli, i segreti nel diff vanno a mind-security, la release (tag/changelog) chiude il ciclo
 - **mind-recall → memory**: il contesto storico recuperato che è duraturo viene (previo consenso) salvato in mind-memory
+- **planning → runner**: il piano (header + task) di `mind-planning` è l'input della coda di `mind-runner`; se il piano ha placeholder, si torna a `mind-planning` prima di partire
+- **runner → implementation/verification/git/memory**: il loop di `mind-runner` esegue ogni task via `mind-implementation`, chiude con `mind-verification`, committa/pusha con `mind-git`, salva checkpoint con `mind-memory`; riprende da solo tra sessioni leggendo lo stato su file
 - **ogni rotta di implementazione → mind-verification**: nessun lavoro è completo senza evidenza di verifica
 
 ## Principi di esecuzione

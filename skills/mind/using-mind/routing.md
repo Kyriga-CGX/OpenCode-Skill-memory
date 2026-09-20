@@ -34,6 +34,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Git workflow / branch / commit / worktree | `mind-git` → `mind-verification` |
 | Release / versioning / changelog / tag | `mind-release` → `mind-devops` (build/publish) → `mind-verification` |
 | Piano multi-step / spec pronto | `mind-planning` → `mind-implementation` → `mind-verification` |
+| Obiettivo complesso / piano da eseguire per intero in autonomia (multi-sessione, "finisci da solo") | `mind-runner` (coda persistente + loop + checkpoint + gate verde) — piano da `mind-planning`, task via `mind-implementation`, gate via `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice / PR | `mind-implementation` (review + fix-loop) / `mind-verification` |
@@ -66,6 +67,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 10. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta.
 11. `mind-setup` è il gate iniziale su progetto nuovo: prima la configurazione (working-set), poi il task.
 12. Gli MCP si invocano SOLO on-demand, quando un agente deve fare una chiamata (es. `context7-mcp`). MAI una call MCP all'avvio del programma.
+13. `mind-runner` entra SOLO per un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner: va dritto alla rotta specifica.
 
 ## Casi limite
 
@@ -93,6 +95,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Prima configurazione**: al primo messaggio di un progetto nuovo senza configurazione salvata, apri con `mind-setup` (annuncio + domande una alla volta + working-set in memoria), poi instrada il task. Non lavorare prima della configurazione.
 - **Documenti vs codice**: file .pdf/.docx/.xlsx/.pptx → `mind-documents` (creare/modificare/leggere + verifica visiva). Codice o testo semplice → rotta normale. Il testo dentro un documento → `mind-copy` se serve copywriting.
 - **Git vs implementazione**: task di versionamento (commit/branch/worktree/PR) → `mind-git`. Il parallelismo dei subagent di mind-implementation usa i worktree di mind-git. Non confondere: git gestisce COME versionare, implementation COSA costruire.
+- **Runner vs task singolo**: un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni, "finisci da solo") → `mind-runner` (loop con coda persistente e checkpoint). Un singolo task o una singola feature → rotta specifica, NON il runner.
 - **Proattività**: se noti un gap nei requisiti, un rischio o un miglioramento utile non richiesto → proponilo con il tool `question` PRIMA di procedere (o segnalalo durante il lavoro). Non ignorarlo, non implementarlo in silenzio fuori scope. Regole operative in using-mind/SKILL.md e nelle skill mind-planning/mind-implementation.
 
 ## Output attesi (catena)
@@ -100,6 +103,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - `mind-brainstorming` → spec approvato in `docs/specs/YYYY-MM-DD-<topic>-design.md`
 - `mind-architecture` → ADR in `docs/adr/ADR-<NNN>-<slug>.md` + indice README
 - `mind-planning` → piano in `docs/plans/YYYY-MM-DD-<topic>.md` con header e task
+- `mind-runner` → coda `.mind/run/<run-id>/queue.json` + ledger + state; obiettivo chiuso solo a gate `mind-verification` verde su tutti i task
 - `mind-implementation` → codice + test che passano + ledger
 - `mind-explore` → Codebase Digest (docs/ o README) + mappa salvata in memoria
 - `mind-recall` → contesto recuperato dallo storico con fonte (id sessione + titolo)
