@@ -10,7 +10,7 @@ Sistema di skill completo per opencode: orchestrazione a 360° (routing intellig
 
 - `config/` — configurazione opencode (`opencode.jsonc`, `mind-memory.json`, `vibeguard.config.json`, `dcp.jsonc`, `AGENTS.md`). Le chiavi API sono sostituite con placeholder `${VAR}`; i valori reali vanno nel file `.env` locale (vedi `.env.example`).
 - `plugins/` — plugin locali fork personali: `mind` (orchestratore, inietta il bootstrap e registra le skill) e `mind-memory` (memoria locale-first). Vanno copiati in `~/.config/opencode/plugins/` e referenziati con `file:` nel config.
-- `skills/` — skill custom dell'agente: il fork `mind/` con l'orchestratore `using-mind` e 23 skill di dominio, più le skill storiche (context7-mcp, design-md, design-system, ecosystem-health-check, execution-hygiene, frontend-design, motion, orchestrator, stop-slop). Le directory node_modules sono escluse.
+- `skills/` — skill custom dell'agente: il fork `mind/` con l'orchestratore `using-mind` e 26 skill di dominio, più le skill storiche (context7-mcp, design-md, design-system, ecosystem-health-check, execution-hygiene, frontend-design, motion, orchestrator, stop-slop). Le directory node_modules sono escluse.
 - `docs/` — documentazione e note decisionali, incluso `system-diagram.md`.
 
 > La memoria supermemory non è più usata: sostituita dal plugin locale `mind-memory` (storage in `~/.local/share/opencode/mind-memory/memories.json`, cloud opzionale disattivato se non configurato).
@@ -59,8 +59,8 @@ sequenceDiagram
 
     R->>P: ogni richiesta (hook experimental.chat.system.transform)
     P->>P: legge using-mind/SKILL.md, estrae frontmatter, cache modulare
-    P->>R: prepende il bootstrap <EXTREMELY_IMPORTANT> al system prompt
-    Note over R: sempre attivo: ogni turno di ogni sessione (anche pre-esistenti)<br/>guardia anti-doppia: se il system contiene già EXTREMELY_IMPORTANT, non duplica
+    P->>R: prepende il bootstrap EXTREMELY_IMPORTANT al system prompt
+    Note over R: sempre attivo: ogni turno di ogni sessione (anche pre-esistenti)<br/>guardia anti-doppia: se il system contiene già il blocco, non duplica
     R->>O: task in ingresso + routing (tabella rotte)
     O->>S: invoca skill col tool skill, annuncia "Uso <skill> per <scopo>"
     S-->>O: risultato (spec / piano / root cause / codice / evidenza)
@@ -104,6 +104,10 @@ sequenceDiagram
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (se UI) | nuovo progetto |
 | Review codice | `mind-implementation` (review+fix-loop) / `mind-verification` | PR/review |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory` | "come avevamo fatto..." |
+| Richiamo con storico completo | `memory` search → `mind-recall` (storico sessioni, sola lettura) | la memoria non basta, serve lo storico |
+| Prima configurazione / progetto nuovo | `mind-setup` (domande una alla volta → working-set) → rotta del task | primo messaggio senza config salvata |
+| Documenti (PDF/DOCX/XLSX/PPTX) | `mind-documents` → (`mind-copy` per il testo) → `mind-verification` | file documento |
+| Git workflow / branch / commit / worktree | `mind-git` → `mind-verification` | versionamento, PR, parallelismo |
 | Riepilogo sessione | `memory` tool (summarize) via `mind-memory` | "riepiloga la sessione" |
 | Salvataggio preferenza/contesto | `memory` tool (add) via `mind-memory` | "ricorda che..." |
 
@@ -115,8 +119,9 @@ sequenceDiagram
 5. `mind-verification` + `execution-hygiene` SEMPRE gate finale.
 6. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 7. Skill di dominio entrano SOLO se il task tocca quel dominio.
+8. `mind-setup` è il gate iniziale su progetto nuovo; `mind-recall` è il fallback del richiamo (dopo `memory` search); gli MCP si invocano SOLO on-demand, mai all'avvio.
 
-**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`.
+**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`. Richiamo vs recall → prima `memory` search, poi `mind-recall`. Documenti vs codice → file .pdf/.docx/.xlsx/.pptx = `mind-documents`.
 
 ## Agenti FMA — come vengono chiamati e quando
 
@@ -269,7 +274,7 @@ flowchart TD
 
 ## Skill mind
 
-L'orchestratore `using-mind` decide la rotta per ogni task e coordina la comunicazione tra skill (vedi `skills/mind/using-mind/routing.md`). Skill di dominio: brainstorming, planning, implementation (multi-subagent in parallelo con agenti FMA), verification, debugging, security, research, performance, data, testing, docs, migration, devops, refactor, api, release, explore, architecture, copy, incident, i18n, eval.
+L'orchestratore `using-mind` decide la rotta per ogni task e coordina la comunicazione tra skill (vedi `skills/mind/using-mind/routing.md`). Skill di dominio (26): brainstorming, planning, implementation (multi-subagent in parallelo con agenti FMA), verification, debugging, security, research, performance, data, testing, docs, migration, devops, refactor, api, release, explore, architecture, copy, incident, i18n, eval, **recall** (storico sessioni), **setup** (prima configurazione), **documents** (PDF/DOCX/XLSX/PPTX), **git** (workflow versionamento).
 
 ## Ripristino
 
