@@ -11,7 +11,14 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | UI (costruire o modificare) | `frontend-design` (direzione, consulta design-references) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
 | UI (solo ritocco stile esistente) | `design-system` (enforce) → `mind-verification` |
 | Animazione / motion / 3D | `motion` → `frontend-design` (solo se serve direzione) → `mind-verification` |
-| Prosa / testi / copy | `stop-slop` |
+| Prosa / testi / copy (pulizia esistente) | `stop-slop` |
+| Copywriting / contenuti / landing / email | `mind-copy` → `stop-slop` → (`frontend-design` se in UI) → `mind-verification` |
+| Comprendere / esplorare codice sconosciuto / onboarding / impatto di un cambio | `mind-explore` (digest) → (`mind-docs` se il digest va documentato) → `mind-memory` (salva mappa) |
+| Decisione architetturale / ADR / trade-off di design | `mind-brainstorming` (spec) → `mind-architecture` (ADR) → `mind-planning` |
+| Incidente in produzione / servizio giù / postmortem | `mind-incident` (triage+mitigazione) → (`mind-debugging` root cause / `mind-security` se breach / `mind-devops` rollback) → `mind-docs` (postmortem) → `mind-verification` |
+| Localizzazione / nuova lingua / traduzioni / i18n | `mind-i18n` → `mind-implementation` → `mind-testing` → `mind-verification` |
+| Valutare prompt / agent / skill del sistema | `mind-eval` (report) → l'orchestratore applica le modifiche |
+| Riepilogo sessione di lavoro | `memory` tool (summarize) via `mind-memory` |
 | Bug / comportamento inatteso | `mind-debugging` → `mind-implementation` (TDD) → `mind-verification` |
 | Bug hunting proattivo / review difensiva | `mind-debugging` (sezione bug hunting) → `mind-testing` → `mind-verification` |
 | Sicurezza / breach / threat model / hardening | `mind-security` → `mind-implementation` (fix) → `mind-verification` |
@@ -51,7 +58,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione quando il task tocca dati sensibili, auth, pagamenti o rete (threat model prima di scrivere codice).
-9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
+9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Casi limite
 
@@ -65,6 +72,14 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Task API**: creare/modificare endpoint, contratti, versioning, consumo terze parti → `mind-api`. Se l'API espone auth, dati sensibili o pagamenti → apri con `mind-security` (threat model) prima del contratto. Modifica di un'API esistente consumata altrove → considera breaking change e coordina con `mind-migration`.
 - **Release a fine ciclo**: dopo una feature completata e verificata, se l'utente chiede release/versione/changelog/tag → `mind-release` (semantic versioning + changelog + tag annotato), che si appoggia a `mind-devops` per build/publish; il gate `mind-verification` (build+test verdi) precede il tag.
 - **Task misto dati + feature**: prima `mind-data` per schema/query verificate, poi la rotta standard; il gate finale copre l'intero delta.
+- **Task misto sicurezza + feature**: se la feature tocca auth/dati sensibili/pagamenti/rete, apri con `mind-security` (threat model) PRIMA di `mind-brainstorming`/`mind-planning`, poi rientra nella rotta standard.
+- **Task misto UI + copy**: prima la rotta UI, poi `stop-slop` sui testi; gate unico finale.
+- **Esplorazione vs implementazione**: "capisci/spiega/valuta impatto di questo codice" (nessuna modifica) → `mind-explore` (digest). Se dall'esplorazione emerge un lavoro → nuova rotta normale con il digest come input.
+- **ADR vs feature**: una decisione architetturale (scelta DB, architettura, pattern) → `mind-architecture` (ADR registrato in docs/adr/) dopo la spec di `mind-brainstorming` e prima di `mind-planning`. Micro-decisioni di implementazione NON richiedono ADR.
+- **Copy creation vs pulizia**: creare testi nuovi (landing/email/CTA) → `mind-copy`; pulire testi esistenti dai pattern AI → `stop-slop`. Se il copy vive in una UI, coordina con `frontend-design`.
+- **Incident vs bug**: servizio giù/degrado in produzione (triage+mitigazione+postmortem) → `mind-incident`. Bug di funzionamento senza impatto produzione → `mind-debugging` normale.
+- **i18n vs feature**: il task tocca lingue/traduzioni/plurale/date-RTL → `mind-i18n` prima, poi la rotta di implementazione normale.
+- **Eval del sistema**: valutare i prompt/agent/skill di mind stesso (non codice app) → `mind-eval`; il report guida l'orchestratore a modificare il sistema con eval prima/dopo.
 - **Clarificazione prima della rotta**: non fare domande di chiarimento prima di aver scelto la rotta; la skill scelta guida l'esplorazione (es. `mind-brainstorming` fa domande una alla volta).
 - **Gate finale**: il gate `mind-verification` (evidenza fresca di verifica, nessuna affermazione senza prova) si applica a ogni rotta di implementazione. `execution-hygiene` fornisce le regole operative (checkpoint, registro, qualità) lungo la rotta.
 - **Proattività**: se noti un gap nei requisiti, un rischio o un miglioramento utile non richiesto → proponilo con il tool `question` PRIMA di procedere (o segnalalo durante il lavoro). Non ignorarlo, non implementarlo in silenzio fuori scope. Regole operative in using-mind/SKILL.md e nelle skill mind-planning/mind-implementation.
@@ -72,8 +87,12 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 ## Output attesi (catena)
 
 - `mind-brainstorming` → spec approvato in `docs/specs/YYYY-MM-DD-<topic>-design.md`
+- `mind-architecture` → ADR in `docs/adr/ADR-<NNN>-<slug>.md` + indice README
 - `mind-planning` → piano in `docs/plans/YYYY-MM-DD-<topic>.md` con header e task
 - `mind-implementation` → codice + test che passano + ledger
+- `mind-explore` → Codebase Digest (docs/ o README) + mappa salvata in memoria
+- `mind-incident` → postmortem in `docs/incidents/YYYY-MM-DD-<slug>-postmortem.md` (azioni con owner+scadenza)
+- `mind-eval` → report in `docs/eval/YYYY-MM-DD-<target>-eval.md` + memoria
 - `mind-verification` → evidenza eseguita (output test/lint/build) e conferma
 
 ## Fonti esterne

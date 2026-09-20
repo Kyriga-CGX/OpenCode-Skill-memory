@@ -3,7 +3,7 @@ import fs from 'fs';
 import os from 'os';
 import { tool } from '@opencode-ai/plugin/tool';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const CONFIG_FILENAME = 'mind-memory.json';
 
 // --- Config ---
@@ -176,6 +176,7 @@ export default {
         const wantsRemember =
           /(ricorda che|ricordati che|memorizza|salva nella memoria|ricorda questo|tieni a mente)/i.test(userText);
         const wantsForget = /(dimentica|elimina dalla memoria|non ricordare più)/i.test(userText);
+        const wantsSummarize = /(riepiloga la sessione|riepiloga il lavoro|salva il riepilogo|riassumi la sessione|salva un riepilogo)/i.test(userText);
         const needsRecall = detectRecall(userText);
 
         if (wantsRemember) {
@@ -190,6 +191,12 @@ export default {
             text: 'L\'utente vuole dimenticare qualcosa. Se ti riferisci a una memoria specifica, usa il tool `memory` con mode "forget" e il suo id.',
             synthetic: true
           });
+        } else if (wantsSummarize) {
+          output.parts.push({
+            type: 'text',
+            text: 'L\'utente vuole un riepilogo della sessione di lavoro. Componi un riepilogo conciso (obiettivo, cosa fatto, decisioni, risultati, prossimi passi) e salvalo con il tool `memory` mode "summarize", scope "project".',
+            synthetic: true
+          });
         } else if (needsRecall) {
           output.parts.push({
             type: 'text',
@@ -202,9 +209,9 @@ export default {
       tool: {
         memory: tool({
           description:
-            'Memoria persistente di mind-memory (locale-first, cloud opzionale). Use "search" per trovare memorie rilevanti prima di rispondere quando il messaggio richiama lavoro precedente, "add" per salvare conoscenza, "list" per vedere le memorie recenti, "profile" per il profilo, "forget" per rimuovere, "help" per istruzioni.',
+            'Memoria persistente di mind-memory (locale-first, cloud opzionale). Use "search" per trovare memorie rilevanti prima di rispondere quando il messaggio richiama lavoro precedente, "add" per salvare conoscenza, "list" per vedere le memorie recenti, "profile" per il profilo, "forget" per rimuovere, "summarize" per salvare un riepilogo di sessione di lavoro, "help" per istruzioni.',
           args: {
-            mode: tool.schema.enum(['add', 'search', 'profile', 'list', 'forget', 'help']).optional(),
+            mode: tool.schema.enum(['add', 'search', 'profile', 'list', 'forget', 'summarize', 'help']).optional(),
             content: tool.schema.string().optional(),
             scope: tool.schema.enum(['user', 'project']).optional(),
             type: tool.schema.string().optional(),
@@ -223,6 +230,7 @@ export default {
                     'mind-memory: memoria persistente locale (file JSON) + cloud opzionale.',
                     '- search <query> [scope] [limit]: cerca memorie rilevanti',
                     '- add <content> [scope=user|project] [type] [title]: salva una memoria',
+                    '- summarize <content> [title]: salva un riepilogo di sessione di lavoro (type=session-summary, scope=project)',
                     '- list [limit]: elenca le memorie recenti',
                     '- profile: mostra il profilo utente',
                     '- forget <id>: rimuove una memoria'
@@ -294,6 +302,28 @@ export default {
                 }
                 const cloud = await cloudRequest('/v1/profile', {});
                 return { text: cloud.success ? JSON.stringify(cloud.data, null, 2) : 'Profilo non disponibile.' };
+              }
+
+              case 'summarize': {
+                if (!args.content) return { text: 'Errore: content richiesto per mode=summarize.' };
+                const local = addLocal({
+                  content: args.content,
+                  scope: args.scope || 'project',
+                  type: args.type || 'session-summary',
+                  title: args.title || `Riepilogo sessione ${new Date().toISOString().slice(0, 10)}`
+                });
+                let cloud = { success: false, error: 'cloud non configurato' };
+                if (cloudConfigured) {
+                  cloud = await cloudRequest('/v1/memories', {
+                    content: args.content,
+                    scope: 'project',
+                    type: 'session-summary',
+                    title: local.title
+                  });
+                }
+                return {
+                  text: `Riepilogo di sessione salvato (id ${local.id}).` + (cloud.success ? ' Sincronizzato sul cloud.' : '')
+                };
               }
 
               case 'forget': {

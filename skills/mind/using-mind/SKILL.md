@@ -18,7 +18,14 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Nuova feature / lavoro creativo | `mind-brainstorming` → `mind-planning` → `mind-implementation` → `mind-verification` |
 | UI (costruire o modificare) | `frontend-design` (direzione, consulta design-references) → `design-md` (crea DESIGN.md solo se manca) → `design-system` (enforce) → `motion` (solo se tocca animazioni) → `mind-verification` |
 | Animazione / motion / 3D | `motion` → `frontend-design` (solo se serve direzione) → `mind-verification` |
-| Prosa / testi / copy | `stop-slop` |
+| Prosa / testi / copy (pulizia esistente) | `stop-slop` |
+| Copywriting / contenuti / landing / email | `mind-copy` → `stop-slop` → (`frontend-design` se in UI) → `mind-verification` |
+| Comprendere / esplorare codice sconosciuto / onboarding / impatto di un cambio | `mind-explore` (digest) → (`mind-docs` se il digest va documentato) → `mind-memory` (salva mappa) |
+| Decisione architetturale / ADR / trade-off di design | `mind-brainstorming` (spec) → `mind-architecture` (ADR) → `mind-planning` |
+| Incidente in produzione / servizio giù / postmortem | `mind-incident` (triage+mitigazione) → (`mind-debugging` root cause / `mind-security` se breach / `mind-devops` rollback) → `mind-docs` (postmortem) → `mind-verification` |
+| Localizzazione / nuova lingua / traduzioni / i18n | `mind-i18n` → `mind-implementation` → `mind-testing` → `mind-verification` |
+| Valutare prompt / agent / skill del sistema | `mind-eval` (report) → l'orchestratore applica le modifiche |
+| Riepilogo sessione di lavoro | `memory` tool (summarize) via `mind-memory` |
 | Bug / comportamento inatteso | `mind-debugging` → `mind-implementation` (TDD) → `mind-verification` |
 | Bug hunting proattivo / review difensiva | `mind-debugging` (sezione bug hunting) → `mind-testing` → `mind-verification` |
 | Sicurezza / breach / threat model / hardening | `mind-security` → `mind-implementation` (fix) → `mind-verification` |
@@ -48,7 +55,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 6. `mind-verification` ed `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 7. Le istruzioni utente (AGENTS.md, richieste dirette) prevalgono sulle skill.
 8. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete (threat model prima del codice).
-9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
+9. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Gate e sequenza (regole di orchestrazione)
 
@@ -79,6 +86,17 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **api → migration**: modificare un'API esistente usata da client = breaking change, gestito con `mind-migration` (versioning/deprecation)
 - **release → devops**: la release usa la pipeline di build/publish di `mind-devops`; il tag/changelog di `mind-release` chiude il ciclo
 - **release → verification**: nessuna release senza build+test verdi (gate `mind-verification`)
+- **explore → docs/memory**: il Codebase Digest prodotto da `mind-explore` è l'input di `mind-docs` (se documentato) e viene salvato in `mind-memory` (mappa del progetto)
+- **explore → context7-mcp**: durante l'esplorazione, le librerie/framework sconosciuti si verificano con `context7-mcp`
+- **architecture → planning**: l'ADR di `mind-architecture` (decisione registrata) è vincolo di input per il piano di `mind-planning`
+- **architecture → api/security/migration**: le decisioni architetturali impattano contratti API, threat model e migrazioni; coordina PRIMA di implementare
+- **copy → frontend-design**: il copy che vive in UI si coordina con la direzione estetica di `frontend-design`
+- **copy → stop-slop**: `mind-copy` produce, `stop-slop` pulisce (revisione finale del testo)
+- **copy → memory**: tono/voce/brand dell'utente vengono salvati in `mind-memory` (tool `memory` add) e recuperati PRIMA di scrivere
+- **incident → debugging/security/devops**: dopo la mitigazione, root cause con `mind-debugging`, analisi breach con `mind-security`, rollback/ambiente con `mind-devops`
+- **incident → docs**: il postmortem di `mind-incident` (docs/incidents/) è l'output formale; le azioni correttive proseguono come task normali
+- **i18n → implementation/testing/verification**: `mind-i18n` definisce struttura e chiavi, `mind-testing` aggiunge test per lingua, `mind-verification` chiude con evidenza
+- **eval → orchestratore**: `mind-eval` produce il report e le modifiche al sistema (prompt/skill/agent) le decide SOLO l'orchestratore, con eval prima/dopo senza regressioni
 - **devops → implementation**: la pipeline e gli ambienti guidano il codice di deploy
 - **design-system → frontend-design**: `design-system` delega la direzione estetica a `frontend-design` (inverse: `frontend-design` non enforce, delega a `design-system`)
 - **motion → frontend-design**: `motion` delega la direzione estetica a `frontend-design`

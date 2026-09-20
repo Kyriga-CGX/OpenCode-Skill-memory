@@ -11,7 +11,14 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Nuova feature / lavoro creativo | mind-brainstorming → mind-planning → mind-implementation → mind-verification |
 | Costruire o modificare UI | frontend-design (direzione, consulta design-references) → design-md (solo se manca DESIGN.md) → design-system (enforce) → motion (solo se tocca animazioni) → gate |
 | Animazione / motion / 3D | motion → frontend-design (solo se serve direzione) → gate |
-| Prosa / testi / copy | stop-slop |
+| Prosa / testi / copy (pulizia esistente) | stop-slop |
+| Copywriting / contenuti / landing / email | mind-copy → stop-slop → (frontend-design se in UI) → gate |
+| Comprendere / esplorare codice sconosciuto / onboarding / impatto cambio | mind-explore (digest) → (mind-docs se da documentare) → mind-memory |
+| Decisione architetturale / ADR | mind-brainstorming (spec) → mind-architecture (ADR) → mind-planning |
+| Incidente in produzione / postmortem | mind-incident (triage+mitigazione) → (mind-debugging / mind-security / mind-devops) → mind-docs (postmortem) → gate |
+| Localizzazione / i18n / nuova lingua | mind-i18n → mind-implementation → mind-testing → gate |
+| Valutare prompt / agent / skill del sistema | mind-eval (report) → l'orchestratore applica le modifiche |
+| Riepilogo sessione | memory tool (summarize) via mind-memory |
 | Bug | mind-debugging → mind-implementation → gate |
 | Bug hunting proattivo / review difensiva | mind-debugging (bug hunting) → mind-testing → gate |
 | Sicurezza / breach / threat model / hardening | mind-security → mind-implementation → gate |
@@ -38,7 +45,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 4. `motion` entra nella rotta SOLO se il task tocca animazioni.
 5. `mind-verification` / `execution-hygiene` sono SEMPRE il gate finale, mai prima delle skill di contenuto.
 6. `mind-security` va PRIMA di qualsiasi implementazione che tocca dati sensibili, auth, pagamenti o rete.
-7. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release` entrano SOLO se il task tocca quel dominio specifico.
+7. `mind-migration`/`mind-performance`/`mind-data`/`mind-refactor`/`mind-api`/`mind-release`/`mind-explore`/`mind-architecture`/`mind-copy`/`mind-incident`/`mind-i18n`/`mind-eval` entrano SOLO se il task tocca quel dominio specifico.
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -59,3 +66,9 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Refactor vs migration**: "rifattorizza/pulisci/riorganizza/semplifica" senza cambio stack → `mind-refactor`; upgrade/cambio stack → `mind-migration`.
 - **Task API**: endpoint/contratti/versioning/consumo terze parti → `mind-api`; auth/dati sensibili → `mind-security` prima del contratto; API esistente modificata → breaking change via `mind-migration`.
 - **Release a fine ciclo**: release/versione/changelog/tag → `mind-release`, appoggiandosi a `mind-devops`; gate `mind-verification` (build+test) prima del tag.
+- **Esplorazione vs implementazione**: "capisci/spiega/valuta impatto" (nessuna modifica) → `mind-explore`; se emerge lavoro → nuova rotta con il digest come input.
+- **ADR vs feature**: decisione architetturale → `mind-architecture` (ADR in docs/adr/) dopo la spec e prima del piano; micro-decisioni NON richiedono ADR.
+- **Copy creation vs pulizia**: testi nuovi → `mind-copy`; pulizia pattern AI → `stop-slop`; copy in UI → coordina con `frontend-design`.
+- **Incident vs bug**: produzione giù/degrado → `mind-incident` (mitigazione+postmortem); bug senza impatto produzione → `mind-debugging`.
+- **i18n vs feature**: task con lingue/traduzioni/RTL → `mind-i18n` prima, poi la rotta di implementazione normale.
+- **Eval del sistema**: valutare prompt/agent/skill di mind stesso → `mind-eval`; le modifiche le applica l'orchestratore con eval prima/dopo.
