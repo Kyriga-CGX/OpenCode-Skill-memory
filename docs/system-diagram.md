@@ -2,7 +2,7 @@
 
 Visione completa del sistema `mind`: come si attiva, come vengono chiamati e ruotano gli agenti, come funziona la memoria, il routing, i gate e i richiami tra skill.
 
-> I diagrammi sono **Mermaid** (renderizzati automaticamente da GitHub). Se non li vedi renderizzati, consulta il repo su github.com.
+> **La fonte primaria è il README** (contiene i diagrammi Mermaid completi). Questo file è la copia estesa di riferimento. I diagrammi sono **Mermaid** (renderizzati automaticamente da GitHub).
 
 ---
 
