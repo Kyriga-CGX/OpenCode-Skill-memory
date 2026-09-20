@@ -48,17 +48,17 @@ sequenceDiagram
     participant O as Orchestratore (using-mind)
     participant S as Skill di dominio
 
-    R->>P: primo messaggio utente (hook chat.messages.transform)
+    R->>P: ogni richiesta (hook experimental.chat.system.transform)
     P->>P: legge using-mind/SKILL.md, estrae frontmatter, cache modulare
-    P->>R: unshift di part sintetico <EXTREMELY_IMPORTANT> con using-mind
-    Note over R: guardia anti-doppia: se il messaggio contiene già<br/>EXTREMELY_IMPORTANT, non reinietta
+    P->>R: prepende il bootstrap <EXTREMELY_IMPORTANT> al system prompt
+    Note over R: sempre attivo: ogni turno di ogni sessione (anche pre-esistenti)<br/>guardia anti-doppia: se il system contiene già EXTREMELY_IMPORTANT, non duplica
     R->>O: task in ingresso + routing (tabella rotte)
     O->>S: invoca skill col tool skill, annuncia "Uso <skill> per <scopo>"
     S-->>O: risultato (spec / piano / root cause / codice / evidenza)
     O->>S: skill successiva della rotta (catena)
 ```
 
-- Il plugin **mind** fa solo 2 cose: registra la dir skill in `config.skills.paths` e inietta il bootstrap. Nessuna rete, nessun update-check (motivo: niente lentezza all'avvio).
+- Il plugin **mind** fa solo 2 cose: registra la dir skill in `config.skills.paths` e inietta il bootstrap nel system prompt a ogni turno. Nessuna rete, nessun update-check (motivo: niente lentezza all'avvio).
 - Il plugin **mind-memory** è locale-first: legge `mind-memory.json` (cloud opzionale), storage in `~/.local/share/opencode/mind-memory/memories.json`.
 
 ---

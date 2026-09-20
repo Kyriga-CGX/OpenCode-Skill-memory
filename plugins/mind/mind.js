@@ -61,15 +61,12 @@ export default {
           config.skills.paths.push(dir);
         }
       },
-      'experimental.chat.messages.transform': async (_input, output) => {
+      'experimental.chat.system.transform': async (_input, output) => {
         const bootstrap = getBootstrapContent();
-        if (!bootstrap || !output.messages?.length) return;
-        const firstUser = output.messages.find((m) => m.info?.role === 'user');
-        if (!firstUser || !firstUser.parts?.length) return;
-        if (firstUser.parts.some((p) => p.type === 'text' && p.text.includes('EXTREMELY_IMPORTANT'))) return;
-
-        const ref = firstUser.parts[0];
-        firstUser.parts.unshift({ ...ref, type: 'text', text: bootstrap });
+        if (!bootstrap || !output.system?.length) return;
+        const joined = output.system.join('\n');
+        if (joined.includes('EXTREMELY_IMPORTANT')) return;
+        output.system.unshift(bootstrap);
       }
     };
   }
