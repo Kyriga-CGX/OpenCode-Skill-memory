@@ -19,7 +19,7 @@ Quando dispatch subagent (mind-implementation, using-mind), assegna a ciascuno u
 | Test rigorosi | Izumi Curtis | mind-testing, disciplina |
 | Documentazione | Maes Hughes | mind-docs, report |
 | Gate / qualità severa | Olivier Mira Armstrong | gate finale, nessuna scusa |
-| Architettura / visione | Van Hohenheim | design, pianificazione |
+| Architettura / visione / consulenza (Sage) | Van Hohenheim | design, pianificazione, domande meta/consultive (mind-consult) |
 | Arbitro finale / adjudicate | King Bradley | decisioni, conflitti tra subagent |
 
 ## Regola

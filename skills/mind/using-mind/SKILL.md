@@ -45,6 +45,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` |
 | Obiettivo complesso / piano da eseguire per intero in autonomia (lavoro multi-sessione, "finisci da solo") | `mind-runner` (coda persistente + loop + checkpoint + gate verde) — piano da `mind-planning`, task via `mind-implementation`, gate via `mind-verification` |
 | Domanda libreria / framework / API | `context7-mcp` |
+| Consulenza / ragionamento / strategia / confronto / valutazione (NON costruire) | `mind-consult` (via subagent `sage` = Van Hohenheim) → se sfocia in costruzione, rotta normale |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (solo se UI) |
 | Review codice | `mind-implementation` (review + fix-loop) / `mind-verification` |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory`, prima di rispondere; se non basta → `mind-recall` (storico sessioni) |
@@ -65,6 +66,7 @@ Prima di rispondere o agire, identifica il tipo di task e scegli la rotta dalla 
 10. `mind-recall` è il fallback del richiamo: prima `memory` search (veloce), poi `mind-recall` (storico) se la memoria non basta. Mai invertire.
 11. Gli MCP si invocano SOLO on-demand, quando un agente deve fare una chiamata (es. `context7-mcp` per documentazione). MAI una call MCP all'avvio del programma: rallenta il boot.
 12. `mind-runner` entra SOLO quando il task è un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner: va dritto alla rotta specifica.
+13. `mind-consult` (subagent `sage`) entra SOLO per domande meta/consultive — pensare, consigliare, decidere — non per costruire/modificare codice. Se il parere sfocia in lavoro, si torna alla rotta di implementazione.
 
 ## Gate e sequenza (regole di orchestrazione)
 
@@ -118,6 +120,8 @@ Mind fa comunicare le skill passando il **risultato** di una all'input della suc
 - **mind-recall → memory**: il contesto storico recuperato che è duraturo viene (previo consenso) salvato in mind-memory
 - **planning → runner**: il piano (header + task) di `mind-planning` è l'input della coda di `mind-runner`; se il piano ha placeholder, si torna a `mind-planning` prima di partire
 - **runner → implementation/verification/git/memory**: il loop di `mind-runner` esegue ogni task via `mind-implementation`, chiude con `mind-verification`, committa/pusha con `mind-git`, salva checkpoint con `mind-memory`; riprende da solo tra sessioni leggendo lo stato su file
+- **consult → research/context7-mcp/memory**: `mind-consult` raccoglie evidenze con `mind-research`/`context7-mcp`, legge il contesto da `mind-memory`, e salva la decisione presa in memoria
+- **consult → architecture/eval/brainstorming**: se la domanda è una decisione architetturale → `mind-architecture` (ADR); se valuta il sistema stesso → `mind-eval`; se il consiglio sfocia in costruzione → `mind-brainstorming`/`mind-planning`
 - **ogni rotta di implementazione → mind-verification**: nessun lavoro è completo senza evidenza di verifica
 
 ## Principi di esecuzione

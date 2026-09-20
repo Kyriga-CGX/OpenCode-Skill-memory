@@ -10,7 +10,7 @@ Sistema di skill completo per opencode: orchestrazione a 360° (routing intellig
 
 - `config/` — configurazione opencode (`opencode.jsonc`, `mind-memory.json`, `vibeguard.config.json`, `dcp.jsonc`, `AGENTS.md`). Le chiavi API sono sostituite con placeholder `${VAR}`; i valori reali vanno nel file `.env` locale (vedi `.env.example`).
 - `plugins/` — plugin locali fork personali: `mind` (orchestratore, inietta il bootstrap e registra le skill) e `mind-memory` (memoria locale-first). Vanno copiati in `~/.config/opencode/plugins/` e referenziati con `file:` nel config.
-- `skills/` — skill custom dell'agente: il fork `mind/` con l'orchestratore `using-mind` e 27 skill di dominio, più le skill storiche (context7-mcp, design-md, design-system, ecosystem-health-check, execution-hygiene, frontend-design, motion, orchestrator, stop-slop). Le directory node_modules sono escluse.
+- `skills/` — skill custom dell'agente: il fork `mind/` con l'orchestratore `using-mind` e 28 skill di dominio, più le skill storiche (context7-mcp, design-md, design-system, ecosystem-health-check, execution-hygiene, frontend-design, motion, orchestrator, stop-slop). Le directory node_modules sono escluse.
 - `docs/` — documentazione e note decisionali, incluso `system-diagram.md`.
 
 > La memoria supermemory non è più usata: sostituita dal plugin locale `mind-memory` (storage in `~/.local/share/opencode/mind-memory/memories.json`, cloud opzionale disattivato se non configurato).
@@ -102,6 +102,7 @@ sequenceDiagram
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` | piano pronto |
 | Obiettivo complesso / piano da eseguire per intero in autonomia (multi-sessione, "finisci da solo") | `mind-runner` (coda persistente + loop + checkpoint + gate verde) | lavoro lungo da portare a termine senza conferma a ogni task |
 | Domanda libreria/framework | `context7-mcp` | domanda diretta |
+| Consulenza / ragionamento / strategia / confronto / valutazione (NON costruire) | `mind-consult` (via subagent `sage` = Van Hohenheim) | "cosa mi consigli", "come miglioreresti", decisioni |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (se UI) | nuovo progetto |
 | Review codice | `mind-implementation` (review+fix-loop) / `mind-verification` | PR/review |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory` | "come avevamo fatto..." |
@@ -122,8 +123,9 @@ sequenceDiagram
 7. Skill di dominio entrano SOLO se il task tocca quel dominio.
 8. `mind-setup` è il gate iniziale su progetto nuovo; `mind-recall` è il fallback del richiamo (dopo `memory` search); gli MCP si invocano SOLO on-demand, mai all'avvio.
 9. `mind-runner` entra SOLO per un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner.
+10. `mind-consult` (subagent `sage`) entra SOLO per domande meta/consultive — pensare, consigliare, decidere — non per costruire/modificare codice. Se il parere sfocia in lavoro, si torna alla rotta di implementazione.
 
-**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`. Richiamo vs recall → prima `memory` search, poi `mind-recall`. Documenti vs codice → file .pdf/.docx/.xlsx/.pptx = `mind-documents`. Runner vs task singolo → un obiettivo/piano da portare a termine in autonomia = `mind-runner`; un singolo task = rotta specifica.
+**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`. Richiamo vs recall → prima `memory` search, poi `mind-recall`. Documenti vs codice → file .pdf/.docx/.xlsx/.pptx = `mind-documents`. Runner vs task singolo → un obiettivo/piano da portare a termine in autonomia = `mind-runner`; un singolo task = rotta specifica. Consulenza vs costruzione → "cosa mi consigli / come miglioreresti / è una buona idea" = `mind-consult` (subagent `sage`); se il consiglio sfocia in lavoro → rotta normale; se valuta il sistema → `mind-eval`; se è una decisione architetturale → `mind-architecture`.
 
 ## Agenti FMA — come vengono chiamati e quando
 
@@ -150,7 +152,7 @@ flowchart LR
         G1[Roy Mustang - review/escalation]
         G2[Riza Hawkeye - verifica/evidenza]
         G3[Olivier M. Armstrong - gate qualità]
-        G4[Van Hohenheim - architettura]
+        G4[Van Hohenheim - architettura/consulenza (Sage)]
         G5[King Bradley - adjudicate/conflitti]
     end
 
@@ -173,7 +175,7 @@ flowchart LR
 | Test rigorosi | Izumi Curtis | `mind-testing` |
 | Documentazione | Maes Hughes | `mind-docs`, report |
 | Gate / qualità severa | Olivier Mira Armstrong | gate finale |
-| Architettura / visione | Van Hohenheim | design, pianificazione |
+| Architettura / visione / consulenza (Sage) | Van Hohenheim | design, pianificazione, domande meta/consultive (mind-consult) |
 | Arbitro finale / adjudicate | King Bradley | conflitti tra subagent |
 
 **Regole**: il nome del personaggio è usato OGNI volta che si dispatcha un subagent (rotazione), nel prompt e nel report (`**Edward Elric** (implementer): DONE`). **Ogni tanto** (non sempre) si apre il prompt/report con una battuta dell'anime (elenco in `fma-agents.md`), max una per subagent, coerente col contesto.
@@ -278,7 +280,7 @@ flowchart TD
 
 ## Skill mind
 
-L'orchestratore `using-mind` decide la rotta per ogni task e coordina la comunicazione tra skill (vedi `skills/mind/using-mind/routing.md`). Skill di dominio (27): brainstorming, planning, implementation (multi-subagent in parallelo con agenti FMA), verification, debugging, security, research, performance, data, testing, docs, migration, devops, refactor, api, release, explore, architecture, copy, incident, i18n, eval, **recall** (storico sessioni), **setup** (prima configurazione), **documents** (PDF/DOCX/XLSX/PPTX), **git** (workflow versionamento), **runner** (esecuzione autonoma di un piano/obiettivo con coda persistente e checkpoint).
+L'orchestratore `using-mind` decide la rotta per ogni task e coordina la comunicazione tra skill (vedi `skills/mind/using-mind/routing.md`). Skill di dominio (28): brainstorming, planning, implementation (multi-subagent in parallelo con agenti FMA), verification, debugging, security, research, performance, data, testing, docs, migration, devops, refactor, api, release, explore, architecture, copy, incident, i18n, eval, **recall** (storico sessioni), **setup** (prima configurazione), **documents** (PDF/DOCX/XLSX/PPTX), **git** (workflow versionamento), **runner** (esecuzione autonoma di un piano/obiettivo con coda persistente e checkpoint), **consult** (consulenza/ragionamento/strategia via subagent Sage).
 
 ## Ripristino
 

@@ -34,6 +34,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 | Git workflow / branch / commit / worktree | mind-git → gate |
 | Release / versioning / changelog / tag | mind-release → mind-devops (build/publish) → gate |
 | Domanda libreria / framework | context7-mcp |
+| Consulenza / ragionamento / strategia / confronto / valutazione (NON costruire) | mind-consult (via subagent sage = Van Hohenheim) |
 | Esecuzione piano | mind-planning → mind-implementation + execution-hygiene |
 | Obiettivo complesso / piano da eseguire per intero in autonomia (multi-sessione) | mind-runner (coda persistente + loop + checkpoint + gate verde) |
 | Init progetto | ecosystem-health-check → orchestrator → design-md/DESIGN.md (solo se UI) |
@@ -56,6 +57,7 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 10. `mind-git` entra SOLO quando il task tocca versionamento/branch/commit/worktree.
 10. Gli MCP si invocano SOLO on-demand (es. `context7-mcp`), MAI una call MCP all'avvio del programma.
 11. `mind-runner` entra SOLO per un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner.
+12. `mind-consult` (subagent `sage`) entra SOLO per domande meta/consultive — pensare, consigliare, decidere — non per costruire/modificare codice. Se il parere sfocia in lavoro, si torna alla rotta di implementazione.
 
 ## Regole di orchestrazione (gate e sequenza)
 
@@ -87,3 +89,4 @@ La tabella di routing è la **fonte unica** per instradare un task alla sequenza
 - **Documenti vs codice**: .pdf/.docx/.xlsx/.pptx → `mind-documents`; codice/testo → rotta normale.
 - **Git vs implementazione**: versionamento (commit/branch/worktree/PR) → `mind-git`; parallelismo dei subagent usa i worktree di mind-git.
 - **Runner vs task singolo**: piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni, "finisci da solo") → `mind-runner` (loop con coda persistente e checkpoint). Un singolo task → rotta specifica, NON il runner.
+- **Consulenza vs costruzione**: "cosa mi consigli / come miglioreresti / è una buona idea / analizza questa situazione" (nessuna modifica richiesta) → `mind-consult` (subagent `sage`). Se il consiglio sfocia in lavoro → rotta normale. Se valuta il sistema stesso → `mind-eval`. Se è una decisione architetturale → `mind-architecture`.

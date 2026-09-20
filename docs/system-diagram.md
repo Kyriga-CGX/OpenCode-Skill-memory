@@ -95,6 +95,7 @@ sequenceDiagram
 | Piano multi-step | `mind-planning` → `mind-implementation` → `mind-verification` | piano pronto |
 | Obiettivo complesso / piano da eseguire per intero in autonomia (multi-sessione, "finisci da solo") | `mind-runner` (coda persistente + loop + checkpoint + gate verde) | lavoro lungo da portare a termine senza conferma a ogni task |
 | Domanda libreria/framework | `context7-mcp` | domanda diretta |
+| Consulenza / ragionamento / strategia / confronto / valutazione (NON costruire) | `mind-consult` (via subagent `sage` = Van Hohenheim) | "cosa mi consigli", "come miglioreresti", decisioni |
 | Init progetto | `ecosystem-health-check` → `mind` (routing) → `design-md`/`design-system` (se UI) | nuovo progetto |
 | Review codice | `mind-implementation` (review+fix-loop) / `mind-verification` | PR/review |
 | Richiamo lavoro precedente | `memory` tool (search) via `mind-memory` | "come avevamo fatto..." |
@@ -115,8 +116,9 @@ sequenceDiagram
 7. Skill di dominio entrano SOLO se il task tocca quel dominio.
 8. `mind-setup` è il gate iniziale su progetto nuovo; `mind-recall` è il fallback del richiamo (dopo `memory` search); gli MCP si invocano SOLO on-demand, mai all'avvio.
 9. `mind-runner` entra SOLO per un piano/obiettivo da eseguire per intero in autonomia (più task, possibilmente più sessioni). Un task singolo NON usa il runner.
+10. `mind-consult` (subagent `sage`) entra SOLO per domande meta/consultive — pensare, consigliare, decidere — non per costruire/modificare codice. Se il parere sfocia in lavoro, si torna alla rotta di implementazione.
 
-**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`. Richiamo vs recall → prima `memory` search, poi `mind-recall`. Documenti vs codice → file .pdf/.docx/.xlsx/.pptx = `mind-documents`. Runner vs task singolo → un obiettivo/piano da portare a termine in autonomia = `mind-runner`; un singolo task = rotta specifica.
+**Casi limite**: UI+BE → rotta del dominio predominante, gate unico. Dubbio → route conservativa. Fix rapido di bug già investigato → salta `mind-debugging`. Refactor vs migration → senza cambio stack = refactor. Copy vs pulizia → creare = `mind-copy`, pulire = `stop-slop`. Incident vs bug → produzione giù = `mind-incident`. Richiamo vs recall → prima `memory` search, poi `mind-recall`. Documenti vs codice → file .pdf/.docx/.xlsx/.pptx = `mind-documents`. Runner vs task singolo → un obiettivo/piano da portare a termine in autonomia = `mind-runner`; un singolo task = rotta specifica. Consulenza vs costruzione → "cosa mi consigli / come miglioreresti / è una buona idea" = `mind-consult` (subagent `sage`); se il consiglio sfocia in lavoro → rotta normale; se valuta il sistema → `mind-eval`; se è una decisione architetturale → `mind-architecture`.
 
 ---
 
@@ -145,7 +147,7 @@ flowchart LR
         G1[Roy Mustang - review/escalation]
         G2[Riza Hawkeye - verifica/evidenza]
         G3[Olivier M. Armstrong - gate qualità]
-        G4[Van Hohenheim - architettura]
+        G4[Van Hohenheim - architettura/consulenza (Sage)]
         G5[King Bradley - adjudicate/conflitti]
     end
 
@@ -168,7 +170,7 @@ flowchart LR
 | Test rigorosi | Izumi Curtis | `mind-testing` |
 | Documentazione | Maes Hughes | `mind-docs`, report |
 | Gate / qualità severa | Olivier Mira Armstrong | gate finale |
-| Architettura / visione | Van Hohenheim | design, pianificazione |
+| Architettura / visione / consulenza (Sage) | Van Hohenheim | design, pianificazione, domande meta/consultive (mind-consult) |
 | Arbitro finale / adjudicate | King Bradley | conflitti tra subagent |
 
 **Regole**: il nome del personaggio è usato OGNI volta che si dispatcha un subagent (rotazione), nel prompt e nel report (`**Edward Elric** (implementer): DONE`). **Ogni tanto** (non sempre) si apre il prompt/report con una battuta dell'anime (elenco in `fma-agents.md`), max una per subagent, coerente col contesto.
@@ -285,9 +287,10 @@ plugins/
   mind/          plugin orchestratore (bootstrap + registrazione skill)
   mind-memory/   plugin memoria locale-first (tool memory)
 skills/
-  mind/          using-mind (orchestratore) + routing.md + fma-agents.md + 27 skill di dominio
+  mind/          using-mind (orchestratore) + routing.md + fma-agents.md + 28 skill di dominio
   orchestrator/  wrapper storico del routing (fonte verità: using-mind/routing.md)
   + 8 skill custom (context7-mcp, design-md, design-system, ecosystem-health-check,
     execution-hygiene, frontend-design, motion, stop-slop)
+config/agents/   sage.md (subagent Sage = Van Hohenheim, consulenza/ragionamento)
 docs/            questo documento e note decisionali
 ```
