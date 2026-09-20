@@ -32,7 +32,7 @@ A che livello:
 |---|---|---|---|
 | Unit | Logica pura, funzioni, classi, regole di dominio | Basso | Sempre per la core logic |
 | Integration | Confini: DB, API, filesystem, servizi esterni | Medio | A ogni confine con side-effect |
-| E2E | Flussi critici utente end-to-end | Alto | Solo flussi business critici |
+| E2E (Playwright) | Flussi critici utente end-to-end (browser) | Alto | Solo flussi business critici; SEMPRE chiedere all'utente se tenere i test (FASE 5) |
 
 Cosa NON testare:
 - Dettagli di implementazione (refactor-safe: testa comportamento, non internals)
@@ -65,7 +65,34 @@ Ogni step è verificato prima di procedere al successivo. Se il test fallisce pe
 - **Preferisci iniettare dipendenze reali e leggere** (fake in-memory, dipendenze astratte) a mock pesanti.
 - Mock necessari solo quando la dipendenza è lenta, non deterministica o non disponibile.
 
-### FASE 5 — VERIFICA
+### FASE 5 — E2E CON PLAYWRIGHT (per flussi critici UI)
+
+Da usare quando la strategia (FASE 1) ha individuato flussi utente critici end-to-end (login, checkout, onboarding, ricerca, flussi multi-passo). NON usare Playwright per unit/integration: resta per il livello E2E.
+
+**Setup** (se non già presente nel progetto):
+
+- Installare: `npm i -D @playwright/test`, poi `npx playwright install chromium` (o i browser necessari)
+- Creare `playwright.config.ts` alla root: baseURL, webServer (avvia l'app in test), projects, retries, timeout
+- Dipende dal framework dell'app: verifica la documentazione ufficiale con `context7-mcp` se il setup del webServer differisce
+
+**Scrivere i flussi** (file `e2e/<flusso>.spec.ts`):
+
+- **Test = percorso utente**, non funzione: "l'utente effettua il login e vede la dashboard", non "il button chiama onLogin"
+- **Selettori resilienti**: `getByRole`, `getByLabel`, `getByText`, `getByPlaceholder` — MAI CSS/XPath legati alla struttura o testid superflui
+- **Stato del test**: seed/teardown espliciti (DB di test, API di test), indipendenza tra test
+- **Asserzione sull'outcome reale**: URL, contenuto visibile, stato dell'elemento — non sull'animazione
+- **Screenshot/trace**: attiva `trace: 'on-first-retry'` e screenshot su failure per il debug
+
+**Domanda all'utente (OBBLIGATORIA)**: dopo aver scritto i test E2E per un flusso, **chiedi all'utente** (tool `question`) se vuole **tenere i test E2E** nel progetto:
+
+- Opzioni: "Tieni i test E2E" / "Rimuovili, erano solo di verifica" / "Tieni solo alcuni flussi"
+- Se l'utente li tiene: assicurati che girino in CI (o almeno via script `npm run test:e2e`) e che siano documentati (comandi, browser richiesti)
+- Se l'utente li rimuove: elimina i file e la config Playwright, e registra in mind-memory (tool `memory add`) la decisione e i flussi verificati
+- Non rimuovere MAI senza chiedere: i test E2E possono essere intenzionali
+
+**Verifica E2E**: esegui la suite (`npx playwright test`), conferma che i flussi critici passano in headless, e che falliscono quando la funzionalità è rotta (mutazione mentale del codice → test rosso).
+
+### FASE 6 — VERIFICA
 
 - Esegui **TUTTA la suite**, non solo il test nuovo.
 - Verifica che un test modificato continui a testare la **stessa cosa** di prima.
@@ -97,6 +124,7 @@ Ogni step è verificato prima di procedere al successivo. Se il test fallisce pe
 | Design | Scrivere test con nome comportamentale | Test scritti |
 | TDD | Test rosso → minimo → verde → refactor | Output rosso e verde |
 | Isolamento | Confini mocked, core reale | Setup test |
+| E2E Playwright | Flussi critici utente + domanda all'utente se tenere i test | Suite e2e passa + decisione utente registrata |
 | Verifica | Suite intera + coverage | Exit code 0, report coverage |
 
 ## 7. Regola finale
